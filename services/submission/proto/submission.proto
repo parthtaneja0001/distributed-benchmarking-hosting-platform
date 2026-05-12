@@ -1,0 +1,14 @@
+syntax = "proto3";
+package submission;
+
+service Submission {
+    rpc Upload(stream UploadRequest) returns (UploadResponse);
+}
+
+message UploadRequest {
+    bytes chunk = 1;
+}
+
+message UploadResponse {
+    string submission_id = 1;
+}
