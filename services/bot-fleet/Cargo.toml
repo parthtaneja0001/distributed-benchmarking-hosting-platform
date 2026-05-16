@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "fleet-manager",
+    "bot-worker",
+]
+
+resolver = "2"
