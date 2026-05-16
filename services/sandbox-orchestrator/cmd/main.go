@@ -1,29 +1,37 @@
 package main
 
 import (
-    "context"
-    "log"
-    "os"
-    "os/signal"
+	"context"
+	"log"
+	"os"
+	"os/signal"
 
-    "github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/deployer"
-    "github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/events"
+	"github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/config"
+	"github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/deployer"
+	"github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/events"
 )
 
 func main() {
-    ctx, cancel := context.WithCancel(context.Background())
-    defer cancel()
+	cfg := config.Load()
 
-    // Graceful shutdown on Ctrl+C
-    sigs := make(chan os.Signal, 1)
-    signal.Notify(sigs, os.Interrupt)
-    go func() {
-        <-sigs
-        cancel()
-    }()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-    broker := "localhost:9092"
-    events.ConsumeSubmissions(ctx, broker, deployer.DeployMock)
+	// Graceful shutdown on Ctrl+C
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt)
+	go func() {
+		<-sigs
+		cancel()
+	}()
 
-    log.Println("Orchestrator shutting down")
+	publisher := deployer.NewSandboxReadyPublisher(cfg.KafkaBroker)
+	mockDeployer := deployer.NewMockDeployer(cfg.SandboxMockEndpoint, publisher)
+
+	log.Printf("Sandbox orchestrator consuming from %s", cfg.KafkaBroker)
+	log.Printf("Mock sandbox endpoint: %s", cfg.SandboxMockEndpoint)
+
+	events.ConsumeSubmissions(ctx, cfg.KafkaBroker, mockDeployer.Deploy)
+
+	log.Println("Orchestrator shutting down")
 }
