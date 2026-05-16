@@ -1,0 +1,19 @@
+syntax = "proto3";
+package fleet;
+
+// The Bot Worker implements this service
+service BotWorker {
+    rpc StartTest (TestRequest) returns (TestResponse);
+}
+
+message TestRequest {
+    string endpoint = 1;        // ws://sandbox-xxx.internal:8080/ws
+    int32 num_traders = 2;      // how many concurrent traders per worker
+    int32 duration_secs = 3;    // test length
+    double orders_per_second = 4; // target total OPS per worker
+}
+
+message TestResponse {
+    bool accepted = 1;
+    string test_id = 2;
+}
