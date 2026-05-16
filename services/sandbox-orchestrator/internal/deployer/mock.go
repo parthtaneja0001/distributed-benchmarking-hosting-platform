@@ -13,8 +13,7 @@ import (
 func DeployMock(event events.SubmissionCreated) error {
     fmt.Printf("Mock deploying submission %s (language: %s)...\n", event.ID, event.Language)
     time.Sleep(2 * time.Second)
-
-    return publishSandboxReady(event.ID, "ws://sandbox-"+event.ID+".internal:8080")
+	return publishSandboxReady(event.ID, "ws://localhost:8080/ws")
 }
 
 func publishSandboxReady(submissionID, endpoint string) error {
