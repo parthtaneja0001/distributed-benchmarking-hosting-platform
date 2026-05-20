@@ -12,3 +12,6 @@ uuid = { version = "1", features = ["v4"] }
 rdkafka = { version = "0.36", features = ["cmake-build"] }
 tar = "0.4"
 flate2 = "1"
+aws-sdk-s3 = "1"
+aws-config = { version = "1", features = ["behavior-version-latest"] }
+anyhow = "1"

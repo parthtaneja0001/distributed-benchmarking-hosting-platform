@@ -17,6 +17,7 @@ func ConsumeSubmissions(ctx context.Context, broker string, process ProcessFunc)
         Brokers: []string{broker},
         Topic:   "submission.created",
         GroupID: "sandbox-orchestrator",
+        StartOffset: kafka.FirstOffset,
     })
     defer reader.Close()
 

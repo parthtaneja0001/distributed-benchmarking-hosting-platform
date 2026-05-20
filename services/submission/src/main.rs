@@ -1,5 +1,5 @@
 use axum::{
-    extract::Multipart,
+    extract::{Multipart, State},
     http::StatusCode,
     response::Json,
     routing::post,
@@ -14,7 +14,10 @@ use storage::Storage;
 mod events;
 use events::{publish_submission_created, detect_language};
 
-async fn handle_upload(mut multipart: Multipart) -> (StatusCode, Json<serde_json::Value>) {
+async fn handle_upload(
+    State(storage): State<Storage>,
+    mut multipart: Multipart,
+) -> (StatusCode, Json<serde_json::Value>) {
     let data = match multipart.next_field().await {
         Ok(Some(field)) => match field.bytes().await {
             Ok(bytes) => bytes.to_vec(),
@@ -28,12 +31,11 @@ async fn handle_upload(mut multipart: Multipart) -> (StatusCode, Json<serde_json
     };
 
     let id = uuid::Uuid::new_v4().to_string();
-    let storage = Storage::new("./submissions");
+    let language = detect_language(&data);
 
     match storage.store(&id, &data).await {
-        Ok(path) => {
-            let language = detect_language(&data);
-            publish_submission_created(&id, &path, language).await;
+        Ok(object_key) => {
+            publish_submission_created(&id, &object_key, language).await;
             (StatusCode::OK, Json(json!({"id": id, "language": language})))
         }
         Err(e) => {
@@ -45,7 +47,10 @@ async fn handle_upload(mut multipart: Multipart) -> (StatusCode, Json<serde_json
 
 #[tokio::main]
 async fn main() {
-    let app = Router::new().route("/upload", post(handle_upload));
+    let storage = Storage::new("submissions").await;
+    let app = Router::new()
+        .route("/upload", post(handle_upload))
+        .with_state(storage);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     println!("Submission service running on {}", addr);

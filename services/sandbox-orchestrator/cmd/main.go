@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/config"
 	"github.com/parthtaneja0001/distributed-benchmarking-hosting-platform/services/sandbox-orchestrator/internal/deployer"
@@ -13,11 +14,9 @@ import (
 
 func main() {
 	cfg := config.Load()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Graceful shutdown on Ctrl+C
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
 	go func() {
@@ -25,13 +24,23 @@ func main() {
 		cancel()
 	}()
 
-	publisher := deployer.NewSandboxReadyPublisher(cfg.KafkaBroker)
-	mockDeployer := deployer.NewMockDeployer(cfg.SandboxMockEndpoint, publisher)
+	pub := deployer.NewSandboxReadyPublisher(cfg.KafkaBroker)
 
-	log.Printf("Sandbox orchestrator consuming from %s", cfg.KafkaBroker)
-	log.Printf("Mock sandbox endpoint: %s", cfg.SandboxMockEndpoint)
+	// Select deployer: set DEPLOY_MODE=docker to use real containers
+	var d deployer.Deployer
+	mode := strings.ToLower(os.Getenv("DEPLOY_MODE"))
+	if mode == "docker" {
+		dd, err := deployer.NewDockerDeployer(pub)
+		if err != nil {
+			log.Fatalf("Failed to create Docker deployer: %v", err)
+		}
+		d = dd
+		log.Println("Using Docker deployer")
+	} else {
+		d = deployer.NewMockDeployer(pub, cfg.SandboxMockEndpoint)
+		log.Println("Using Mock deployer")
+	}
 
-	events.ConsumeSubmissions(ctx, cfg.KafkaBroker, mockDeployer.Deploy)
-
+	events.ConsumeSubmissions(ctx, cfg.KafkaBroker, d.Deploy)
 	log.Println("Orchestrator shutting down")
 }

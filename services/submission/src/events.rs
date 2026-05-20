@@ -1,7 +1,6 @@
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::ClientConfig;
 use serde_json::json;
-use std::io::Read;
 use std::time::Duration;
 use tar::Archive;
 use flate2::read::GzDecoder;
@@ -10,13 +9,15 @@ use flate2::read::GzDecoder;
 /// Returns "go", "rust", "cpp", or "unknown".
 pub fn detect_language(tarball_bytes: &[u8]) -> &'static str {
     let cursor = std::io::Cursor::new(tarball_bytes);
-    let decoder = match GzDecoder::new(cursor) {
-        Ok(d) => d,
-        Err(_) => return "unknown",
-    };
+    let decoder = GzDecoder::new(cursor);
     let mut archive = Archive::new(decoder);
 
-    for entry in archive.entries().unwrap_or_else(|_| Vec::new().into_iter()) {
+    let entries = match archive.entries() {
+        Ok(entries) => entries,
+        Err(_) => return "unknown",
+    };
+
+    for entry in entries {
         let entry = match entry {
             Ok(e) => e,
             Err(_) => continue,
