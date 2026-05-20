@@ -1,8 +1,43 @@
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use rdkafka::ClientConfig;
 use serde_json::json;
+use std::io::Read;
 use std::time::Duration;
+use tar::Archive;
+use flate2::read::GzDecoder;
 
+/// Detect the programming language from the uploaded tarball.
+/// Returns "go", "rust", "cpp", or "unknown".
+pub fn detect_language(tarball_bytes: &[u8]) -> &'static str {
+    let cursor = std::io::Cursor::new(tarball_bytes);
+    let decoder = match GzDecoder::new(cursor) {
+        Ok(d) => d,
+        Err(_) => return "unknown",
+    };
+    let mut archive = Archive::new(decoder);
+
+    for entry in archive.entries().unwrap_or_else(|_| Vec::new().into_iter()) {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        let path = entry.path().unwrap_or_default();
+        let filename = path.to_string_lossy();
+
+        if filename.contains("Cargo.toml") {
+            return "rust";
+        }
+        if filename.contains("go.mod") {
+            return "go";
+        }
+        if filename.contains("CMakeLists.txt") || filename.ends_with(".cpp") || filename.ends_with(".hpp") {
+            return "cpp";
+        }
+    }
+    "unknown"
+}
+
+/// Publish a `submission.created` event to Redpanda.
 pub async fn publish_submission_created(id: &str, object_key: &str, language: &str) {
     let producer: FutureProducer = ClientConfig::new()
         .set("bootstrap.servers", "localhost:9092")

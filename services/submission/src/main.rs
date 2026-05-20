@@ -12,7 +12,7 @@ mod storage;
 use storage::Storage;
 
 mod events;
-use events::publish_submission_created;
+use events::{publish_submission_created, detect_language};
 
 async fn handle_upload(mut multipart: Multipart) -> (StatusCode, Json<serde_json::Value>) {
     let data = match multipart.next_field().await {
@@ -32,8 +32,9 @@ async fn handle_upload(mut multipart: Multipart) -> (StatusCode, Json<serde_json
 
     match storage.store(&id, &data).await {
         Ok(path) => {
-            publish_submission_created(&id, &path, "unknown").await;
-            (StatusCode::OK, Json(json!({"id": id, "stored": path})))
+            let language = detect_language(&data);
+            publish_submission_created(&id, &path, language).await;
+            (StatusCode::OK, Json(json!({"id": id, "language": language})))
         }
         Err(e) => {
             eprintln!("Storage error: {}", e);
