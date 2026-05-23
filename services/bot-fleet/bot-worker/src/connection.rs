@@ -3,11 +3,13 @@ use tokio_tungstenite::{connect_async, tungstenite::Message};
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
+
 use crate::order_generator::generate_order;
+use crate::publishers::{OrderSent, FillActual};
 
 #[derive(Deserialize)]
 struct Ack {
-    event: String,               
+    event: String,
     order_id: String,
     timestamp: u128,
 }
@@ -28,6 +30,8 @@ pub async fn run_bot(
     duration: Duration,
     test_id: String,
     tx: mpsc::UnboundedSender<TelemetryEvent>,
+    order_tx: mpsc::UnboundedSender<OrderSent>,
+    fill_tx: mpsc::UnboundedSender<FillActual>,
 ) {
     // Connect to the WebSocket endpoint
     let ws_stream = match connect_async(&endpoint).await {
@@ -40,13 +44,15 @@ pub async fn run_bot(
 
     let (mut write, mut read) = ws_stream.split();
 
-    // Spawn a reader task that listens for acks
+    // Spawn a reader task that listens for acks and fills
     let tx_clone = tx.clone();
     let test_id_clone = test_id.clone();
+    let fill_tx_clone = fill_tx.clone();
     let read_handle = tokio::spawn(async move {
         while let Some(msg) = read.next().await {
             match msg {
                 Ok(Message::Text(text)) => {
+                    // Try to parse as Ack first
                     if let Ok(ack) = serde_json::from_str::<Ack>(&text) {
                         let now = std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
@@ -64,6 +70,26 @@ pub async fn run_bot(
                             success: true,
                         };
                         let _ = tx_clone.send(event);
+                        continue;
+                    }
+
+                    // Try to parse as Fill
+                    #[derive(Deserialize)]
+                    struct FillMsg {
+                        event: String,
+                        order_id: String,
+                        price: f64,
+                        quantity: u32,
+                    }
+                    if let Ok(fill) = serde_json::from_str::<FillMsg>(&text) {
+                        if fill.event == "fill" {
+                            let _ = fill_tx_clone.send(FillActual {
+                                test_id: test_id_clone.clone(),
+                                order_id: fill.order_id,
+                                fill_price: fill.price,
+                                fill_quantity: fill.quantity,
+                            });
+                        }
                     }
                 }
                 Ok(Message::Close(_)) => break,
@@ -87,6 +113,16 @@ pub async fn run_bot(
 
         let order = generate_order(trader_id, order_counter);
 
+        // Publish the sent order for correctness validation
+        let _ = order_tx.send(OrderSent {
+            test_id: test_id.clone(),
+            order_id: order.order_id.clone(),
+            order_type: order.order_type.clone(),
+            side: order.side.clone(),
+            price: order.price,
+            quantity: order.quantity,
+        });
+
         let payload = match serde_json::to_string(&order) {
             Ok(p) => p,
             Err(e) => {
@@ -101,7 +137,7 @@ pub async fn run_bot(
         order_counter += 1;
     }
 
-    // Closing connection 
+    // Close connection gracefully
     let _ = write.send(Message::Close(None)).await;
     let _ = read_handle.await;
 }

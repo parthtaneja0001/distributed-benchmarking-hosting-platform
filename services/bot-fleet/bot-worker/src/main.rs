@@ -1,6 +1,7 @@
 mod connection;
 mod metrics;
 mod order_generator;
+mod publishers;                       
 
 use tonic::{transport::Server, Request, Response, Status};
 use tokio::sync::mpsc;
@@ -29,9 +30,13 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
 
         // Channel for telemetry events from bots -> Kafka publisher
         let (tx, rx) = mpsc::unbounded_channel();
-
-        // Spawn the Kafka publisher task
         tokio::spawn(metrics::kafka_publisher(rx));
+
+        // Channels for order and fill streams
+        let (order_tx, order_rx) = mpsc::unbounded_channel();
+        let (fill_tx, fill_rx) = mpsc::unbounded_channel();
+        tokio::spawn(publishers::order_publisher(order_rx));
+        tokio::spawn(publishers::fill_publisher(fill_rx));
 
         // Spawn bot tasks
         let test_id_clone = test_id.clone();
@@ -46,6 +51,9 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
                 let endpoint = endpoint.clone();
                 let tx = tx.clone();
                 let test_id = test_id_clone.clone();
+                let order_tx = order_tx.clone();   
+                let fill_tx = fill_tx.clone();    
+
                 let handle = tokio::spawn(connection::run_bot(
                     endpoint,
                     i,
@@ -53,6 +61,8 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
                     duration,
                     test_id,
                     tx,
+                    order_tx,                    
+                    fill_tx,                     
                 ));
                 handles.push(handle);
             }
