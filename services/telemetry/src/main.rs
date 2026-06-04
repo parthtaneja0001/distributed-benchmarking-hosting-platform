@@ -6,6 +6,7 @@ mod metrics;
 mod processor;
 mod redis_sink;
 mod validation;
+mod shadow_book;
 
 use config::Config;
 use kafka_consumer::TelemetryConsumer;

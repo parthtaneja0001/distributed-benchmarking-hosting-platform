@@ -46,6 +46,10 @@ impl LatencyHistogram {
             p99_us: self.histogram.value_at_quantile(0.99),
         })
     }
+
+    pub fn reset(&mut self) {
+        self.histogram.reset();  
+    }
 }
 
 impl Default for LatencyHistogram {

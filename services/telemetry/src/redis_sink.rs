@@ -21,6 +21,7 @@ struct RedisMetricsDocument<'a> {
     p50_us: Option<u64>,
     p90_us: Option<u64>,
     p99_us: Option<u64>,
+    correctness: f64,   
 }
 
 impl RedisSink {
@@ -39,18 +40,17 @@ impl RedisSink {
         let payload = serde_json::to_string(&RedisMetricsDocument {
             test_id: &snapshot.test_id,
             window_ms,
-            tps: snapshot.tps(window_ms),
+            tps: snapshot.tps,              
             total: snapshot.total,
             success: snapshot.success,
             failure: snapshot.failure,
             p50_us: snapshot.p50_us,
             p90_us: snapshot.p90_us,
             p99_us: snapshot.p99_us,
+            correctness: snapshot.correctness,  
         })
         .expect("metrics snapshot serialization should not fail");
 
-        // Store a compact latest-state JSON document. Leaderboard service will
-        // read this first; historical writes belong in the later Timescale path.
         conn.set::<_, _, ()>(key, payload).await
     }
 
