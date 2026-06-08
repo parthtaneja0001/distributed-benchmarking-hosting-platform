@@ -82,7 +82,12 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse().unwrap();
+    let port: u16 = std::env::var("PORT")
+    .unwrap_or_else(|_| "50051".to_string())
+    .parse()
+    .expect("PORT must be a valid u16");
+
+    let addr = format!("[::1]:{}", port).parse().unwrap();
     println!("Bot Worker listening on {}", addr);
 
     Server::builder()
