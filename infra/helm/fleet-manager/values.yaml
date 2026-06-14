@@ -1,0 +1,8 @@
+image:
+  repository: fleet-manager
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  KAFKA_BROKER: redpanda-0.redpanda.default.svc.cluster.local:9092
+  BOT_WORKER_ADDRESSES: http://bot-worker:50051

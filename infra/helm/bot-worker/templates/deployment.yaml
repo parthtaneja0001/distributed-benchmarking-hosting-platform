@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-worker
+spec:
+  replicas: 2   # demonstrate scaling
+  selector:
+    matchLabels:
+      app: bot-worker
+  template:
+    metadata:
+      labels:
+        app: bot-worker
+    spec:
+      containers:
+      - name: bot-worker
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: KAFKA_BROKER
+          value: {{ .Values.env.KAFKA_BROKER }}
+        - name: PORT
+          value: "50051"

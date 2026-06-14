@@ -17,6 +17,10 @@ pub fn detect_language(tarball_bytes: &[u8]) -> &'static str {
         Err(_) => return "unknown",
     };
 
+    let mut found_go = false;
+    let mut found_rust = false;
+    let mut found_cpp = false;
+
     for entry in entries {
         let entry = match entry {
             Ok(e) => e,
@@ -24,20 +28,20 @@ pub fn detect_language(tarball_bytes: &[u8]) -> &'static str {
         };
         let path = entry.path().unwrap_or_default();
         let filename = path.to_string_lossy();
-
-        if filename.contains("Cargo.toml") {
-            return "rust";
-        }
         if filename.contains("go.mod") {
-            return "go";
-        }
-        if filename.contains("CMakeLists.txt") || filename.ends_with(".cpp") || filename.ends_with(".hpp") {
-            return "cpp";
+            found_go = true;
+        } else if filename.contains("Cargo.toml") {
+            found_rust = true;
+        } else if filename.contains("CMakeLists.txt") || filename.ends_with(".cpp") || filename.ends_with(".hpp") {
+            found_cpp = true;
         }
     }
+
+    if found_go { return "go"; }
+    if found_rust { return "rust"; }
+    if found_cpp { return "cpp"; }
     "unknown"
 }
-
 /// Publish a `submission.created` event to Redpanda.
 pub async fn publish_submission_created(id: &str, object_key: &str, language: &str) {
     let producer: FutureProducer = ClientConfig::new()

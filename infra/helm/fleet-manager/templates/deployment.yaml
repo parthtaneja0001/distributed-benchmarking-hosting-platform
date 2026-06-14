@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fleet-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fleet-manager
+  template:
+    metadata:
+      labels:
+        app: fleet-manager
+    spec:
+      containers:
+      - name: fleet-manager
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: KAFKA_BROKER
+          value: {{ .Values.env.KAFKA_BROKER }}
+        - name: BOT_WORKER_ADDRESSES
+          value: {{ .Values.env.BOT_WORKER_ADDRESSES }}

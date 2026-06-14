@@ -19,13 +19,12 @@ pub struct FillActual {
     pub order_id: String,
     pub fill_price: f64,
     pub fill_quantity: u32,
-    // We don’t have a fill_id; we’ll use the order_id + a counter if needed,
-    // but for correctness we mostly need price/quantity per order.
 }
 
 fn create_producer() -> FutureProducer {
+    let broker = std::env::var("KAFKA_BROKER").unwrap_or_else(|_| "localhost:9092".to_string());
     ClientConfig::new()
-        .set("bootstrap.servers", "localhost:9092")
+        .set("bootstrap.servers", &broker)
         .set("message.timeout.ms", "5000")
         .create()
         .expect("Failed to create Kafka producer")

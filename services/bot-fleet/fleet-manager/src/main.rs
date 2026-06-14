@@ -33,8 +33,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // ---- Kafka consumer for sandbox.ready ----
+    let kafka_broker = env::var("KAFKA_BROKER").unwrap_or_else(|_| "localhost:9092".to_string());
     let consumer: StreamConsumer = rdkafka::ClientConfig::new()
-        .set("bootstrap.servers", "localhost:9092")
+        .set("bootstrap.servers", &kafka_broker)
         .set("group.id", "fleet-manager")
         .set("enable.auto.commit", "true")
         .set("auto.offset.reset", "earliest")

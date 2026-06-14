@@ -1,0 +1,8 @@
+image:
+  repository: telemetry
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  KAFKA_BROKER: redpanda-0.redpanda.default.svc.cluster.local:9092
+  REDIS_URL: redis://redis-master.default.svc.cluster.local:6379

@@ -1,0 +1,12 @@
+image:
+  repository: leaderboard
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  REDIS_ADDR: redis-master.default.svc.cluster.local:6379
+
+service:
+  type: NodePort
+  port: 8081
+  nodePort: 30081

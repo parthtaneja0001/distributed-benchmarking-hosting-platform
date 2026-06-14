@@ -1,0 +1,625 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 374B 0.1s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/alpine:latest
+#2 ...
+
+#3 [auth] library/alpine:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [auth] library/rust:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/rust:alpine
+#5 DONE 2.2s
+
+#2 [internal] load metadata for docker.io/library/alpine:latest
+#2 DONE 2.2s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [stage-1 1/3] FROM docker.io/library/alpine:latest@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4
+#7 resolve docker.io/library/alpine:latest@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4 0.0s done
+#7 DONE 0.0s
+
+#8 [builder 1/5] FROM docker.io/library/rust:alpine@sha256:2ea3db105d38fdfa4e31f366674287fcaa828087e2fe3973befdc537f2d443b1
+#8 resolve docker.io/library/rust:alpine@sha256:2ea3db105d38fdfa4e31f366674287fcaa828087e2fe3973befdc537f2d443b1 0.0s done
+#8 CACHED
+
+#9 [stage-1 2/3] RUN apk add --no-cache ca-certificates librdkafka
+#9 CACHED
+
+#10 [internal] load build context
+#10 transferring context: 898.34kB 0.9s done
+#10 DONE 0.9s
+
+#11 [builder 2/5] RUN apk add --no-cache musl-dev cmake make g++ perl curl-dev librdkafka-dev zlib-dev
+#11 3.072 ( 1/41) Upgrading libcrypto3 (3.5.6-r0 -> 3.5.7-r0)
+#11 3.317 ( 2/41) Upgrading libssl3 (3.5.6-r0 -> 3.5.7-r0)
+#11 3.359 ( 3/41) Installing acl-libs (2.3.2-r1)
+#11 3.372 ( 4/41) Installing libbz2 (1.0.8-r6)
+#11 3.391 ( 5/41) Installing libexpat (2.8.1-r0)
+#11 3.427 ( 6/41) Installing lz4-libs (1.10.0-r1)
+#11 3.450 ( 7/41) Installing xz-libs (5.8.3-r0)
+#11 3.555 ( 8/41) Installing libarchive (3.8.7-r0)
+#11 3.765 ( 9/41) Installing rhash-libs (1.4.6-r0)
+#11 3.800 (10/41) Installing libuv (1.52.1-r0)
+#11 3.829 (11/41) Installing cmake (4.2.3-r0)
+#11 7.331 (12/41) Installing brotli-libs (1.2.0-r1)
+#11 7.458 (13/41) Installing brotli (1.2.0-r1)
+#11 7.485 (14/41) Installing pkgconf (2.5.1-r0)
+#11 7.510 (15/41) Installing brotli-dev (1.2.0-r1)
+#11 7.540 (16/41) Installing c-ares (1.34.6-r0)
+#11 7.596 (17/41) Installing c-ares-dev (1.34.6-r0)
+#11 7.764 (18/41) Installing libunistring (1.4.2-r0)
+#11 8.139 (19/41) Installing libidn2 (2.3.8-r0)
+#11 8.230 (20/41) Installing libidn2-dev (2.3.8-r0)
+#11 8.250 (21/41) Installing libpsl (0.21.5-r3)
+#11 8.390 (22/41) Installing libpsl-utils (0.21.5-r3)
+#11 8.409 (23/41) Installing libpsl-dev (0.21.5-r3)
+#11 8.426 (24/41) Installing nghttp2-libs (1.69.0-r0)
+#11 8.456 (25/41) Installing nghttp2-dev (1.69.0-r0)
+#11 8.491 (26/41) Installing openssl-dev (3.5.7-r0)
+#11 8.721 (27/41) Installing zlib-dev (1.3.2-r0)
+#11 8.740 (28/41) Installing zstd (1.5.7-r2)
+#11 8.976 (29/41) Installing zstd-dev (1.5.7-r2)
+#11 8.995 (30/41) Installing libcurl (8.20.0-r1)
+#11 9.168 (31/41) Installing curl-dev (8.20.0-r1)
+#11 9.194 (32/41) Installing libstdc++-dev (15.2.0-r5)
+#11 9.790 (33/41) Installing g++ (15.2.0-r5)
+#11 12.24 (34/41) Installing gdbm (1.26-r0)
+#11 12.26 (35/41) Installing libsasl (2.1.28-r9)
+#11 12.29 (36/41) Installing librdkafka (2.14.1-r0)
+#11 12.46 (37/41) Installing lz4-dev (1.10.0-r1)
+#11 12.49 (38/41) Installing cyrus-sasl-dev (2.1.28-r9)
+#11 12.59 (39/41) Installing librdkafka-dev (2.14.1-r0)
+#11 12.64 (40/41) Installing make (4.4.1-r4)
+#11 12.68 (41/41) Installing perl (5.42.2-r0)
+#11 15.08 Executing busybox-1.37.0-r31.trigger
+#11 15.12 Executing ca-certificates-20260413-r0.trigger
+#11 15.26 OK: 342.8 MiB in 70 packages
+#11 DONE 15.8s
+
+#12 [builder 3/5] WORKDIR /app
+#12 DONE 0.1s
+
+#13 [builder 4/5] COPY . .
+#13 DONE 24.0s
+
+#14 [builder 5/5] RUN cargo build --release --locked
+#14 2.219     Updating crates.io index
+#14 9.567  Downloading crates ...
+#14 9.852   Downloaded atomic-waker v1.1.2
+#14 9.914   Downloaded http-body v1.0.1
+#14 9.927   Downloaded fnv v1.0.7
+#14 9.939   Downloaded futures-core v0.3.32
+#14 9.949   Downloaded ecdsa v0.16.9
+#14 9.953   Downloaded crypto-common v0.2.2
+#14 9.959   Downloaded aws-smithy-async v1.2.14
+#14 9.965   Downloaded block-buffer v0.12.0
+#14 9.968   Downloaded base16ct v0.2.0
+#14 9.976   Downloaded aws-smithy-runtime-api-macros v1.0.0
+#14 9.979   Downloaded aws-smithy-query v0.60.15
+#14 9.990   Downloaded futures-sink v0.3.32
+#14 9.995   Downloaded idna_adapter v1.2.2
+#14 9.997   Downloaded errno v0.3.14
+#14 10.00   Downloaded aws-smithy-http v0.63.6
+#14 10.01   Downloaded aws-smithy-eventstream v0.60.20
+#14 10.02   Downloaded ipnet v2.12.0
+#14 10.09   Downloaded fs_extra v1.3.0
+#14 10.17   Downloaded itoa v1.0.18
+#14 10.18   Downloaded crc32fast v1.5.0
+#14 10.20   Downloaded elliptic-curve v0.13.8
+#14 10.22   Downloaded tower-service v0.3.3
+#14 10.22   Downloaded arc-swap v1.9.1
+#14 10.24   Downloaded tower-layer v0.3.3
+#14 10.25   Downloaded hybrid-array v0.4.12
+#14 10.27   Downloaded pin-utils v0.1.0
+#14 10.28   Downloaded hmac v0.13.0
+#14 10.29   Downloaded getrandom v0.4.2
+#14 10.31   Downloaded getrandom v0.2.17
+#14 10.32   Downloaded untrusted v0.9.0
+#14 10.32   Downloaded urlencoding v2.1.3
+#14 10.32   Downloaded try-lock v0.2.5
+#14 10.33   Downloaded bitflags v2.13.0
+#14 10.35   Downloaded utf8_iter v1.0.4
+#14 10.35   Downloaded allocator-api2 v0.2.21
+#14 10.38   Downloaded hyper-rustls v0.27.9
+#14 10.38   Downloaded aws-sdk-sso v1.101.0
+#14 10.41   Downloaded version_check v0.9.5
+#14 10.43   Downloaded xattr v1.6.1
+#14 10.43   Downloaded zerofrom-derive v0.1.7
+#14 10.44   Downloaded zerofrom v0.1.8
+#14 10.45   Downloaded yoke-derive v0.8.2
+#14 10.46   Downloaded aws-runtime v1.7.4
+#14 10.49   Downloaded vsimd v0.8.0
+#14 10.50   Downloaded toml_parser v1.1.2+spec-1.1.0
+#14 10.52   Downloaded zmij v1.0.21
+#14 10.53   Downloaded rustc_version v0.4.1
+#14 10.54   Downloaded num-conv v0.2.2
+#14 10.55   Downloaded proc-macro-crate v3.5.0
+#14 10.57   Downloaded writeable v0.6.3
+#14 10.58   Downloaded unicode-ident v1.0.24
+#14 10.59   Downloaded tracing-core v0.1.36
+#14 10.61   Downloaded openssl-probe v0.2.1
+#14 10.61   Downloaded mime v0.3.17
+#14 10.62   Downloaded yoke v0.8.3
+#14 10.63   Downloaded toml_edit v0.25.12+spec-1.1.0
+#14 10.65   Downloaded url v2.5.8
+#14 10.67   Downloaded zerotrie v0.2.4
+#14 10.68   Downloaded aws-smithy-runtime v1.11.3
+#14 10.72   Downloaded typenum v1.20.1
+#14 10.76   Downloaded serde_urlencoded v0.7.1
+#14 10.77   Downloaded h2 v0.4.14
+#14 10.81   Downloaded h2 v0.3.27
+#14 10.83   Downloaded axum v0.7.9
+#14 10.86   Downloaded sha1 v0.10.6
+#14 10.87   Downloaded zerovec v0.11.6
+#14 10.94   Downloaded sync_wrapper v1.0.2
+#14 10.95   Downloaded aws-lc-rs v1.17.0
+#14 11.03   Downloaded signature v2.2.0
+#14 11.05   Downloaded tokio-macros v2.7.0
+#14 11.07   Downloaded vcpkg v0.2.15
+#14 11.34   Downloaded subtle v2.6.1
+#14 11.35   Downloaded sha1 v0.11.0
+#14 11.37   Downloaded time-core v0.1.8
+#14 11.38   Downloaded stable_deref_trait v1.2.1
+#14 11.39   Downloaded icu_properties_data v2.2.0
+#14 11.45   Downloaded want v0.3.1
+#14 11.46   Downloaded rustls-native-certs v0.8.4
+#14 11.47   Downloaded jobserver v0.1.34
+#14 11.48   Downloaded num_enum_derive v0.7.6
+#14 11.48   Downloaded hyper v1.10.1
+#14 11.50   Downloaded hyper v0.14.32
+#14 11.53   Downloaded tracing v0.1.44
+#14 11.72   Downloaded tinystr v0.8.3
+#14 11.72   Downloaded time-macros v0.2.27
+#14 11.73   Downloaded primeorder v0.13.6
+#14 11.73   Downloaded synstructure v0.13.2
+#14 11.74   Downloaded spki v0.7.3
+#14 11.74   Downloaded quote v1.0.45
+#14 11.75   Downloaded slab v0.4.12
+#14 11.76   Downloaded simd-adler32 v0.3.9
+#14 11.77   Downloaded signal-hook-registry v1.4.8
+#14 11.77   Downloaded shlex v2.0.1
+#14 11.78   Downloaded rand_core v0.6.4
+#14 11.78   Downloaded sha2 v0.10.9
+#14 11.79   Downloaded serde_path_to_error v0.1.20
+#14 11.79   Downloaded sec1 v0.7.3
+#14 11.80   Downloaded scopeguard v1.2.0
+#14 11.80   Downloaded rustversion v1.0.22
+#14 11.81   Downloaded pkg-config v0.3.33
+#14 11.81   Downloaded multer v3.1.0
+#14 11.82   Downloaded powerfmt v0.2.0
+#14 11.82   Downloaded pin-project-lite v0.2.17
+#14 11.83   Downloaded md-5 v0.11.0
+#14 11.84   Downloaded lock_api v0.4.14
+#14 11.84   Downloaded aws-sdk-sts v1.106.0
+#14 11.87   Downloaded futures-util v0.3.32
+#14 11.91   Downloaded tower v0.5.3
+#14 11.94   Downloaded potential_utf v0.1.5
+#14 11.95   Downloaded outref v0.5.2
+#14 11.96   Downloaded hashbrown v0.17.1
+#14 11.99   Downloaded hashbrown v0.16.1
+#14 12.01   Downloaded aws-config v1.8.18
+#14 12.04   Downloaded hyper-util v0.1.20
+#14 12.05   Downloaded rustls-pki-types v1.14.1
+#14 12.06   Downloaded num_enum v0.7.6
+#14 12.07   Downloaded parking_lot v0.12.5
+#14 12.09   Downloaded pem-rfc7468 v0.7.0
+#14 12.09   Downloaded parking_lot_core v0.9.12
+#14 12.10   Downloaded crc-fast v1.10.0
+#14 12.16   Downloaded pkcs8 v0.10.2
+#14 12.16   Downloaded matchit v0.7.3
+#14 12.17   Downloaded once_cell v1.21.4
+#14 12.17   Downloaded num-integer v0.1.46
+#14 12.17   Downloaded lru v0.16.4
+#14 12.18   Downloaded litemap v0.8.2
+#14 12.19   Downloaded semver v1.0.28
+#14 12.19   Downloaded tokio-rustls v0.24.1
+#14 12.20   Downloaded rfc6979 v0.4.0
+#14 12.20   Downloaded icu_collections v2.2.0
+#14 12.22   Downloaded spin v0.10.0
+#14 12.24   Downloaded spin v0.9.8
+#14 12.24   Downloaded encoding_rs v0.8.35
+#14 12.32   Downloaded tokio-rustls v0.26.4
+#14 12.32   Downloaded sha2 v0.11.0
+#14 12.33   Downloaded sct v0.7.1
+#14 12.33   Downloaded icu_locale_core v2.2.0
+#14 12.35   Downloaded http v1.4.2
+#14 12.36   Downloaded aws-smithy-types v1.4.9
+#14 12.37   Downloaded icu_normalizer v2.2.0
+#14 12.38   Downloaded aws-sdk-ssooidc v1.103.0
+#14 12.40   Downloaded icu_normalizer_data v2.2.0
+#14 12.41   Downloaded aws-sdk-s3 v1.135.0
+#14 12.64   Downloaded socket2 v0.5.10
+#14 12.64   Downloaded num-traits v0.2.19
+#14 12.65   Downloaded log v0.4.32
+#14 12.66   Downloaded smallvec v1.15.1
+#14 12.67   Downloaded serde_core v1.0.228
+#14 12.67   Downloaded ryu v1.0.23
+#14 12.67   Downloaded http v0.2.12
+#14 12.68   Downloaded der v0.7.10
+#14 12.70   Downloaded uuid v1.23.3
+#14 12.71   Downloaded serde_derive v1.0.228
+#14 12.71   Downloaded proc-macro2 v1.0.106
+#14 12.72   Downloaded crypto-bigint v0.5.5
+#14 12.73   Downloaded cc v1.2.63
+#14 12.74   Downloaded aws-smithy-http-client v1.1.13
+#14 12.75   Downloaded aws-sigv4 v1.4.5
+#14 12.85   Downloaded socket2 v0.6.4
+#14 12.85   Downloaded p256 v0.13.2
+#14 12.85   Downloaded zerovec-derive v0.11.3
+#14 12.85   Downloaded zeroize v1.8.2
+#14 12.86   Downloaded xmlparser v0.13.6
+#14 12.86   Downloaded tracing-attributes v0.1.31
+#14 12.87   Downloaded percent-encoding v2.3.2
+#14 12.87   Downloaded icu_provider v2.2.0
+#14 12.88   Downloaded icu_properties v2.2.0
+#14 12.88   Downloaded aws-smithy-runtime-api v1.12.3
+#14 12.89   Downloaded toml_datetime v1.1.1+spec-1.1.0
+#14 12.90   Downloaded flate2 v1.1.9
+#14 12.90   Downloaded bytes v1.11.1
+#14 12.91   Downloaded hyper-rustls v0.24.2
+#14 12.91   Downloaded httparse v1.10.1
+#14 12.92   Downloaded const-oid v0.10.2
+#14 12.92   Downloaded const-oid v0.9.6
+#14 12.93   Downloaded base64 v0.22.1
+#14 12.93   Downloaded base64ct v1.8.3
+#14 12.94   Downloaded aws-smithy-json v0.62.7
+#14 12.94   Downloaded aws-smithy-schema v0.1.0
+#14 12.95   Downloaded hmac v0.12.1
+#14 12.95   Downloaded group v0.13.0
+#14 12.96   Downloaded generic-array v0.14.7
+#14 12.96   Downloaded futures-channel v0.3.32
+#14 12.96   Downloaded find-msvc-tools v0.1.9
+#14 12.97   Downloaded either v1.16.0
+#14 12.97   Downloaded digest v0.10.7
+#14 12.97   Downloaded ctutils v0.4.2
+#14 12.98   Downloaded cmake v0.1.58
+#14 12.98   Downloaded aws-types v1.3.16
+#14 12.99   Downloaded aws-smithy-xml v0.60.15
+#14 12.99   Downloaded anyhow v1.0.102
+#14 13.00   Downloaded foldhash v0.2.0
+#14 13.00   Downloaded filetime v0.2.29
+#14 13.01   Downloaded ff v0.13.1
+#14 13.02   Downloaded equivalent v1.0.2
+#14 13.02   Downloaded displaydoc v0.2.6
+#14 13.03   Downloaded digest v0.11.3
+#14 13.04   Downloaded deranged v0.5.8
+#14 13.04   Downloaded cpufeatures v0.3.0
+#14 13.05   Downloaded cmov v0.5.4
+#14 13.05   Downloaded bytes-utils v0.1.4
+#14 13.06   Downloaded axum-core v0.4.5
+#14 13.07   Downloaded async-trait v0.1.89
+#14 13.07   Downloaded httpdate v1.0.3
+#14 13.08   Downloaded http-body-util v0.1.3
+#14 13.08   Downloaded fastrand v2.4.1
+#14 13.09   Downloaded cpufeatures v0.2.17
+#14 13.09   Downloaded aws-smithy-checksums v0.64.8
+#14 13.10   Downloaded aws-credential-types v1.2.14
+#14 13.10   Downloaded autocfg v1.5.1
+#14 13.11   Downloaded rustls-webpki v0.103.13
+#14 13.12   Downloaded http-body v0.4.6
+#14 13.12   Downloaded hex v0.4.3
+#14 13.13   Downloaded futures-task v0.3.32
+#14 13.14   Downloaded form_urlencoded v1.2.2
+#14 13.14   Downloaded dunce v1.0.5
+#14 13.14   Downloaded crypto-common v0.1.7
+#14 13.14   Downloaded cfg-if v1.0.4
+#14 13.14   Downloaded block-buffer v0.10.4
+#14 13.15   Downloaded base64-simd v0.8.0
+#14 13.15   Downloaded aws-smithy-observability v0.2.6
+#14 13.15   Downloaded adler2 v2.0.1
+#14 13.17   Downloaded miniz_oxide v0.8.9
+#14 13.18   Downloaded regex-lite v0.1.9
+#14 13.20   Downloaded serde v1.0.228
+#14 13.22   Downloaded indexmap v2.14.0
+#14 13.30   Downloaded mio v1.2.1
+#14 13.31   Downloaded tar v0.4.46
+#14 13.32   Downloaded memchr v2.8.1
+#14 13.53   Downloaded rdkafka v0.36.2
+#14 13.61   Downloaded idna v1.1.0
+#14 13.70   Downloaded tokio-util v0.7.18
+#14 13.75   Downloaded serde_json v1.0.150
+#14 13.78   Downloaded rustls-webpki v0.101.7
+#14 13.85   Downloaded aws-lc-sys v0.41.0
+#14 14.55   Downloaded winnow v1.0.3
+#14 14.58   Downloaded time v0.3.47
+#14 14.60   Downloaded rustls v0.21.12
+#14 14.61   Downloaded syn v2.0.117
+#14 14.70   Downloaded rustls v0.23.40
+#14 14.74   Downloaded rustix v1.1.4
+#14 15.15   Downloaded libc v0.2.186
+#14 15.29   Downloaded tokio v1.52.3
+#14 15.44   Downloaded libz-sys v1.1.29
+#14 15.55   Downloaded ring v0.17.14
+#14 15.77   Downloaded linux-raw-sys v0.12.1
+#14 16.21   Downloaded rdkafka-sys v4.10.0+2.12.1
+#14 17.10    Compiling libc v0.2.186
+#14 17.10    Compiling proc-macro2 v1.0.106
+#14 17.10    Compiling quote v1.0.45
+#14 17.10    Compiling unicode-ident v1.0.24
+#14 17.11    Compiling cfg-if v1.0.4
+#14 17.11    Compiling bytes v1.11.1
+#14 17.11    Compiling zeroize v1.8.2
+#14 17.11    Compiling smallvec v1.15.1
+#14 18.53    Compiling pin-project-lite v0.2.17
+#14 19.04    Compiling itoa v1.0.18
+#14 19.13    Compiling parking_lot_core v0.9.12
+#14 19.88    Compiling futures-core v0.3.32
+#14 20.04    Compiling scopeguard v1.2.0
+#14 20.49    Compiling lock_api v0.4.14
+#14 21.08    Compiling shlex v2.0.1
+#14 21.37    Compiling find-msvc-tools v0.1.9
+#14 21.40    Compiling typenum v1.20.1
+#14 22.46    Compiling log v0.4.32
+#14 22.65    Compiling once_cell v1.21.4
+#14 23.08    Compiling slab v0.4.12
+#14 24.01    Compiling fnv v1.0.7
+#14 24.09    Compiling version_check v0.9.5
+#14 24.30    Compiling http v1.4.2
+#14 24.64    Compiling futures-task v0.3.32
+#14 25.70    Compiling futures-sink v0.3.32
+#14 26.63    Compiling futures-util v0.3.32
+#14 26.72    Compiling tracing-core v0.1.36
+#14 28.31    Compiling syn v2.0.117
+#14 28.51    Compiling subtle v2.6.1
+#14 29.70    Compiling errno v0.3.14
+#14 29.94    Compiling jobserver v0.1.34
+#14 30.02    Compiling socket2 v0.6.4
+#14 30.90    Compiling signal-hook-registry v1.4.8
+#14 32.21    Compiling cc v1.2.63
+#14 34.03    Compiling parking_lot v0.12.5
+#14 35.46    Compiling mio v1.2.1
+#14 37.62    Compiling http-body v1.0.1
+#14 38.49    Compiling generic-array v0.14.7
+#14 38.91    Compiling getrandom v0.2.17
+#14 39.73    Compiling http v0.2.12
+#14 40.31    Compiling autocfg v1.5.1
+#14 40.72    Compiling const-oid v0.9.6
+#14 41.31    Compiling cmake v0.1.58
+#14 42.69    Compiling http-body-util v0.1.3
+#14 42.70    Compiling num-traits v0.2.19
+#14 43.93    Compiling powerfmt v0.2.0
+#14 44.50    Compiling ryu v1.0.23
+#14 45.91    Compiling deranged v0.5.8
+#14 45.94    Compiling either v1.16.0
+#14 46.36    Compiling outref v0.5.2
+#14 46.45    Compiling vsimd v0.8.0
+#14 47.32    Compiling http-body v0.4.6
+#14 48.24    Compiling num-conv v0.2.2
+#14 48.29    Compiling time-core v0.1.8
+#14 49.66    Compiling bytes-utils v0.1.4
+#14 49.68    Compiling pin-utils v0.1.0
+#14 49.75    Compiling block-buffer v0.10.4
+#14 50.42    Compiling crypto-common v0.1.7
+#14 51.00    Compiling equivalent v1.0.2
+#14 51.57    Compiling base64-simd v0.8.0
+#14 52.08    Compiling digest v0.10.7
+#14 52.16    Compiling untrusted v0.9.0
+#14 53.38    Compiling dunce v1.0.5
+#14 53.53    Compiling fs_extra v1.3.0
+#14 54.07    Compiling percent-encoding v2.3.2
+#14 54.64    Compiling httparse v1.10.1
+#14 56.19    Compiling num-integer v0.1.46
+#14 56.28    Compiling aws-lc-sys v0.41.0
+#14 56.39    Compiling hashbrown v0.17.1
+#14 57.02    Compiling ring v0.17.14
+#14 59.49    Compiling base64ct v1.8.3
+#14 62.74    Compiling rand_core v0.6.4
+#14 64.15    Compiling pem-rfc7468 v0.7.0
+#14 65.25    Compiling time v0.3.47
+#14 66.74    Compiling hybrid-array v0.4.12
+#14 68.13    Compiling futures-channel v0.3.32
+#14 70.14    Compiling indexmap v2.14.0
+#14 70.95    Compiling try-lock v0.2.5
+#14 72.26    Compiling aws-lc-rs v1.17.0
+#14 72.46    Compiling tower-service v0.3.3
+#14 73.39    Compiling stable_deref_trait v1.2.1
+#14 74.09    Compiling want v0.3.1
+#14 75.21    Compiling der v0.7.10
+#14 76.17    Compiling cmov v0.5.4
+#14 76.25    Compiling crc32fast v1.5.0
+#14 78.14    Compiling httpdate v1.0.3
+#14 78.66    Compiling ctutils v0.4.2
+#14 82.47    Compiling crypto-common v0.2.2
+#14 82.48    Compiling block-buffer v0.12.0
+#14 83.60    Compiling rustls-pki-types v1.14.1
+#14 83.61    Compiling rustversion v1.0.22
+#14 86.75    Compiling synstructure v0.13.2
+#14 90.83    Compiling spki v0.7.3
+#14 92.61    Compiling const-oid v0.10.2
+#14 93.49    Compiling atomic-waker v1.1.2
+#14 94.12    Compiling pkcs8 v0.10.2
+#14 94.89    Compiling digest v0.11.3
+#14 97.56    Compiling ff v0.13.1
+#14 99.13    Compiling rustls v0.21.12
+#14 99.21    Compiling rustls v0.23.40
+#14 101.0    Compiling base16ct v0.2.0
+#14 102.7    Compiling group v0.13.0
+#14 102.8    Compiling sec1 v0.7.3
+#14 103.7    Compiling crypto-bigint v0.5.5
+#14 104.5    Compiling tower-layer v0.3.3
+#14 106.0    Compiling base64 v0.22.1
+#14 107.4    Compiling ipnet v2.12.0
+#14 107.8    Compiling sync_wrapper v1.0.2
+#14 108.6    Compiling form_urlencoded v1.2.2
+#14 109.7    Compiling hmac v0.12.1
+#14 110.9    Compiling tokio-macros v2.7.0
+#14 111.5    Compiling tracing-attributes v0.1.31
+#14 111.6    Compiling aws-smithy-runtime-api-macros v1.0.0
+#14 111.6    Compiling zerofrom-derive v0.1.7
+#14 113.9    Compiling yoke-derive v0.8.2
+#14 116.2    Compiling tokio v1.52.3
+#14 118.8    Compiling zerovec-derive v0.11.3
+#14 120.4    Compiling zerofrom v0.1.8
+#14 122.4    Compiling displaydoc v0.2.6
+#14 123.1    Compiling tracing v0.1.44
+#14 124.4    Compiling yoke v0.8.3
+#14 126.5    Compiling elliptic-curve v0.13.8
+#14 127.3    Compiling socket2 v0.5.10
+#14 127.4    Compiling cpufeatures v0.3.0
+#14 128.2    Compiling cpufeatures v0.2.17
+#14 128.8    Compiling openssl-probe v0.2.1
+#14 129.6    Compiling semver v1.0.28
+#14 130.6    Compiling rustls-native-certs v0.8.4
+#14 130.9    Compiling rfc6979 v0.4.0
+#14 130.9    Compiling zerovec v0.11.6
+#14 132.1    Compiling signature v2.2.0
+#14 133.2    Compiling rustc_version v0.4.1
+#14 133.2    Compiling writeable v0.6.3
+#14 135.2    Compiling litemap v0.8.2
+#14 135.9    Compiling getrandom v0.4.2
+#14 137.0    Compiling sct v0.7.1
+#14 137.0    Compiling rustls-webpki v0.101.7
+#14 137.7    Compiling aws-types v1.3.16
+#14 137.8    Compiling ecdsa v0.16.9
+#14 138.2    Compiling tinystr v0.8.3
+#14 138.5    Compiling potential_utf v0.1.5
+#14 139.6    Compiling primeorder v0.13.6
+#14 139.7    Compiling zerotrie v0.2.4
+#14 139.9    Compiling icu_locale_core v2.2.0
+#14 143.5    Compiling sha2 v0.10.9
+#14 143.8    Compiling sha2 v0.11.0
+#14 149.3    Compiling serde_core v1.0.228
+#14 151.6    Compiling utf8_iter v1.0.4
+#14 152.3    Compiling icu_properties_data v2.2.0
+#14 153.1    Compiling icu_normalizer_data v2.2.0
+#14 153.8    Compiling hex v0.4.3
+#14 154.5    Compiling icu_collections v2.2.0
+#14 155.8    Compiling icu_provider v2.2.0
+#14 156.2    Compiling p256 v0.13.2
+#14 160.9    Compiling hmac v0.13.0
+#14 161.2    Compiling pkg-config v0.3.33
+#14 162.3    Compiling winnow v1.0.3
+#14 162.6    Compiling fastrand v2.4.1
+#14 165.4    Compiling uuid v1.23.3
+#14 169.3    Compiling vcpkg v0.2.15
+#14 172.6    Compiling toml_datetime v1.1.1+spec-1.1.0
+#14 175.5    Compiling icu_normalizer v2.2.0
+#14 177.1    Compiling toml_parser v1.1.2+spec-1.1.0
+#14 177.4    Compiling libz-sys v1.1.29
+#14 180.1    Compiling icu_properties v2.2.0
+#14 183.9    Compiling toml_edit v0.25.12+spec-1.1.0
+#14 186.0    Compiling arc-swap v1.9.1
+#14 189.1    Compiling zmij v1.0.21
+#14 189.8    Compiling regex-lite v0.1.9
+#14 192.1    Compiling serde v1.0.228
+#14 196.7    Compiling proc-macro-crate v3.5.0
+#14 199.6    Compiling tokio-util v0.7.18
+#14 200.8    Compiling aws-smithy-async v1.2.14
+#14 201.9    Compiling tower v0.5.3
+#14 203.3    Compiling tokio-rustls v0.24.1
+#14 205.2    Compiling idna_adapter v1.2.2
+#14 205.7    Compiling aws-smithy-types v1.4.9
+#14 206.4    Compiling h2 v0.4.14
+#14 206.5    Compiling h2 v0.3.27
+#14 210.2    Compiling serde_derive v1.0.228
+#14 216.8    Compiling xmlparser v0.13.6
+#14 226.4    Compiling aws-smithy-runtime-api v1.12.3
+#14 249.1    Compiling aws-smithy-eventstream v0.60.20
+#14 249.2    Compiling aws-smithy-schema v0.1.0
+#14 262.6    Compiling aws-smithy-http v0.63.6
+#14 284.3    Compiling aws-credential-types v1.2.14
+#14 290.6    Compiling aws-smithy-observability v0.2.6
+#14 294.5    Compiling hyper v1.10.1
+#14 295.9    Compiling hyper v0.14.32
+#14 295.9    Compiling aws-sigv4 v1.4.5
+#14 306.4    Compiling aws-smithy-json v0.62.7
+#14 322.8    Compiling memchr v2.8.1
+#14 330.0    Compiling hyper-util v0.1.20
+#14 345.2    Compiling serde_json v1.0.150
+#14 345.8    Compiling rustix v1.1.4
+#14 349.0    Compiling aws-smithy-xml v0.60.15
+#14 350.5    Compiling idna v1.1.0
+#14 351.5    Compiling num_enum_derive v0.7.6
+#14 357.0    Compiling rdkafka-sys v4.10.0+2.12.1
+#14 357.6    Compiling multer v3.1.0
+#14 358.0    Compiling mime v0.3.17
+#14 359.2    Compiling foldhash v0.2.0
+#14 360.8    Compiling urlencoding v2.1.3
+#14 362.2    Compiling spin v0.10.0
+#14 363.4    Compiling bitflags v2.13.0
+#14 363.9    Compiling linux-raw-sys v0.12.1
+#14 364.2    Compiling allocator-api2 v0.2.21
+#14 364.5    Compiling num_enum v0.7.6
+#14 365.6    Compiling crc-fast v1.10.0
+#14 367.5    Compiling aws-smithy-query v0.60.15
+#14 369.1    Compiling hashbrown v0.16.1
+#14 375.1    Compiling url v2.5.8
+#14 378.8    Compiling hyper-rustls v0.24.2
+#14 384.1    Compiling sha1 v0.11.0
+#14 387.7    Compiling async-trait v0.1.89
+#14 396.6    Compiling md-5 v0.11.0
+#14 397.6    Compiling encoding_rs v0.8.35
+#14 398.9    Compiling anyhow v1.0.102
+#14 402.4    Compiling adler2 v2.0.1
+#14 403.7    Compiling spin v0.9.8
+#14 403.8    Compiling simd-adler32 v0.3.9
+#14 404.6    Compiling axum-core v0.4.5
+#14 404.7    Compiling aws-smithy-checksums v0.64.8
+#14 404.9    Compiling miniz_oxide v0.8.9
+#14 408.7    Compiling xattr v1.6.1
+#14 414.1    Compiling lru v0.16.4
+#14 415.7    Compiling serde_urlencoded v0.7.1
+#14 415.9    Compiling serde_path_to_error v0.1.20
+#14 417.6    Compiling sha1 v0.10.6
+#14 418.4    Compiling filetime v0.2.29
+#14 419.5    Compiling matchit v0.7.3
+#14 419.9    Compiling tar v0.4.46
+#14 420.4    Compiling flate2 v1.1.9
+#14 423.5    Compiling axum v0.7.9
+#14 510.5    Compiling rdkafka v0.36.2
+#14 512.1    Compiling rustls-webpki v0.103.13
+#14 529.8    Compiling tokio-rustls v0.26.4
+#14 530.8    Compiling hyper-rustls v0.27.9
+#14 533.1    Compiling aws-smithy-http-client v1.1.13
+#14 560.5    Compiling aws-smithy-runtime v1.11.3
+#14 579.4    Compiling aws-runtime v1.7.4
+#14 596.2    Compiling aws-sdk-ssooidc v1.103.0
+#14 596.9    Compiling aws-sdk-sso v1.101.0
+#14 596.9    Compiling aws-sdk-sts v1.106.0
+#14 634.6    Compiling aws-config v1.8.18
+#14 642.2    Compiling aws-sdk-s3 v1.135.0
+#14 1450.6    Compiling submission v0.1.0 (/app)
+#14 1496.3 error: linking with `cc` failed: exit status: 1
+#14 1496.3   |
+#14 1496.3   = note:  "cc" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crt1.o" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crti.o" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crtbegin.o" "/app/target/release/deps/rustc4gFpKs/symbols.o" "<17 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "/app/target/release/deps/{libanyhow-04fb4e67d5c35e76,libaws_config-e6b9066680ea5114,libsha1-bedad67bc2898935,libaws_sdk_ssooidc-973ee1308f6f8841,libaws_sdk_sso-6682c0cc50411f5c,libaws_sdk_sts-d6da619c6bcb689f,libaws_smithy_query-5a268f953525d5f3,liburlencoding-5c457cdc3317e8f1,libflate2-fb239ce6158cadd7,libminiz_oxide-d1b8fed361219862,libsimd_adler32-a3320915fc84c77b,libtar-064bd268717860c9,libxattr-745539fb8c3ea294,librustix-7cb27ccea1932f37,libbitflags-329b19043fefc657,liblinux_raw_sys-f320f8e690229b48,libfiletime-1aca881237553df8,librdkafka-99337592c7add707,librdkafka_sys-e1bd9ffa57aa2774,libnum_enum-db798fb1c92416c7,liblibz_sys-23afe4808ca2b44c}.rlib" "-lz" "/app/target/release/deps/{libaws_sdk_s3-3584f485c629440b,libarc_swap-a7372ebdad525386,libregex_lite-b27c6f484eed7e13,libaws_smithy_json-ec66f733c1434e61,liburl-0321864ee334b8d2,libidna-40536f531a798974,libidna_adapter-c6ab394af8a8d19c,libicu_properties-c9c7f3c365449a9e,libicu_properties_data-9c7d6ff18eada697,libicu_normalizer-c2007bca86d1d3ab,libicu_normalizer_data-40abf4234463f7f9,libicu_collections-c1b25168d6dbda27,libutf8_iter-2968e4c3e8379eda,libpotential_utf-8e754d44980fe976,libicu_provider-27b5b0b4e3ceab59,libicu_locale_core-0fa115740029a5d9,libtinystr-30aea74272d92ccc,liblitemap-ee9d88a3fcacae9f,libwriteable-3926ee70c0d54ea0,libzerovec-d78a375ba7a9320a,libzerotrie-5dfcb45f2e572ed6,libyoke-9b6535e3167bf660,libstable_deref_trait-b3cf341ef9a8ddd0,libzerofrom-15522feec5e60998,liblru-dc2c73228c8be9c8,libhashbrown-b3566ebcdfbfda78,liballocator_api2-3616bc67a6ddd1bc,libfoldhash-11cd77a4506c6685,libaws_smithy_xml-df5bb05bfb24060e,libxmlparser-c9711c8929ce30f7,libaws_smithy_checksums-07e4b36c19503668,libcrc_fast-7eade06762077b6d,libmd5-91f737588026bd4c,libsha1-21a38f6f3bc60907,libaws_runtime-e3d2c1d5cbc8c9bc,libuuid-4a5c3603de0349c0,libgetrandom-e0ced1d24a15d80b,libaws_sigv4-c166fde6c0efe1ab,libhex-8d6c82c67fac0d59,libp256-739b6adbe43dc92b,libsha2-788bfe312878c3ee,libecdsa-612193d06a109797,librfc6979-b8fc2d38ffe742ce,libhmac-22266edb8717c566,libsignature-24b3f4de06d384a5,libdigest-c03ab9bd666d265e,libblock_buffer-1067af97dd3096c3,libcrypto_common-8a15a82b0dc33710,libprimeorder-75a15d73bdf4f555,libelliptic_curve-f525e4fe76fafa0b,libsec1-4c03ac13a206e818,libpkcs8-4ac2d9bfba1ce21d,libspki-82412317fa561d4e,libder-8105149d488dbbfe,libpem_rfc7468-949d1a3422ced4ae,libbase64ct-6a712a538fed0354,libconst_oid-95d234336d68eb7e,libbase16ct-fd5741f36d7c5298,libgroup-e691d7206bbcfdfa,libff-ad3074005c8ad02b,libcrypto_bigint-1c61970954adc1cc,librand_core-e6ac19de932da98c,libgeneric_array-ac0ae49170c71815,libsha2-49377877c2680b2c,libcpufeatures-f7792d405f918262,libhmac-825c8497f96c0d17,libdigest-2de1abe1fc8482b6,libctutils-0c471db51b88aa83,libcmov-781bbe877e0ed021,libconst_oid-d25458d204172cbf,libcrypto_common-bda30eaf80578667,libblock_buffer-89dc1243ca54f480,libhybrid_array-8ec83133f16592d0,libtypenum-e279272a846a2cfa,libaws_smithy_http-f415b613c91f36ee,libaws_smithy_eventstream-7910d02113fcdb10,libcrc32fast-1e44000591a928df,libaws_types-f9fa9f1b9feab4fa,libaws_credential_types-02bfc3feaa191160,libaws_smithy_runtime-da79dab1d35f2eda,libfastrand-e70bf80254e9bc9b,libaws_smithy_schema-976fbc435e55546b,libaws_smithy_observability-79c5bfc84f4cbbab,libaws_smithy_http_client-5a4cc5b7bc87be15,libhyper_rustls-dfbd04ffacc5f5de,libtokio_rustls-3ad7a873b9f6e95c,librustls-1a48d91b77f0209c,libsubtle-b8be50ff316f0954,libwebpki-9b5087dace04239b,libaws_lc_rs-7289c6013e545863,libaws_lc_sys-0ecdc6f4bb0abbdf,librustls_native_certs-1f47c427bdf05c50,libopenssl_probe-8a4651c18e0039fb,librustls_pki_types-48e893d43f6826d9,libhyper_rustls-36d04da8ee8526ff,libtokio_rustls-e036fd43e05054a9,librustls-dcdd84f510bfcc46,libsct-65e4ec8437df32a9,libwebpki-b183dc45dfe18df8,libring-299083a14ef04b4f,libgetrandom-b338fe43637ca2b9,libuntrusted-efb365b240cfe1d0,libhyper-c0537b29e652017c,libsocket2-4ed63995d9a1bd97,libh2-dda3710520533e7f,libaws_smithy_runtime_api-7bcc77fb29c95f97,libaws_smithy_async-4ef7c3c70feb7cd6,libzeroize-a28c0b049ba1dc0a,libaws_smithy_types-3cb722e9dd2f0f92,libpin_utils-fd5c751858abc9cd,libtime-fae4e9fcd18b06fb,libtime_core-53ce9f74bb13e158,libnum_conv-61ae32c76f7e2834,libderanged-d47481b5ebf4ddc8,libpowerfmt-c6023cc2f33e21a7,libnum_integer-67280180fbbfe3ac,libnum_traits-4e588eb18795c349,libbytes_utils-eb3e8b9a07e9d5af,libeither-df5bdff79a15c0d7,libhttp_body-2f6f2dcdbafb775c,libhttp-ba0b89b4a3257a82,libbase64_simd-07e634006b164fa6,liboutref-e13757e20ce69acf,libvsimd-903572add7a73530,libaxum-5c0faed5e40352ed,libmulter-755f1ff8aa476adb,libspin-65ad6f144bb39bd1,libencoding_rs-dd8ad762e3b4e7e2,libserde_path_to_error-879e0181c9830515,libserde_json-e8656b3a72614061,libmemchr-f7f7a1bff49a7081,libzmij-46ad0e09572b0995,libserde_urlencoded-27871078e0ae6226,libryu-cabc8387cf341eb3,libform_urlencoded-6ba2029386861f42,libhyper_util-571696a4e24b43c1,libbase64-f0ca67832992aa8e,libpercent_encoding-6a3dca0ae744f256,libipnet-537f042e4460427a,libhyper-873a463b950d20b8,libwant-a839b9812969e550,libtry_lock-3fa3f2660565684b,libhttparse-d68654e7b00ef676,libh2-d7f3798a9d4dfb64,libindexmap-7da8316743dece04,libequivalent-d3b7b25daa03cb0c,libhashbrown-c906cb25b5e9d144,libslab-08a6f01fe5a842f7,libfnv-ea3e79771e332938,libtokio_util-c50bd9644b5863bc,libfutures_sink-e28d9a06a1db1760,libatomic_waker-f8e72c6fc302729b,libhttpdate-63b02e990b803b33,libfutures_channel-ef9b8db25d4d610a,libmatchit-338b18b96a5bc005,libserde-6228b196fc95c80c,libserde_core-bdd575ac188db782,libaxum_core-f1ec647365b5d4ec,libmime-ec8d6f26ec28fd3b,libhttp_body_util-c04aa4212a7a28bf,libhttp_body-542422c372818ad9,libhttp-1cd2f38fe7e9e191,libitoa-0433a59117baec68,libtracing-8c485e23bb211ef8,liblog-2b26f71e71d5a9b7,libtracing_core-4a36d46516f0ec98,libonce_cell-169a8346f37920c8,libtower-941c33cf5c24b522,libsync_wrapper-9f65761a341e634a,libtower_layer-8164413a753c38d4,libfutures_util-4bac83b5d281b468,libfutures_task-a4b2d7e88af95e15,libfutures_core-129cbe19ef778b81,libtower_service-43fbf8fbce898d6f,libtokio-7b3503dc392936da,libsignal_hook_registry-85340d10446197dd,liberrno-bcef5a10de09d200,libsocket2-a0bf62a7b84706d6,libbytes-53ce709797c1efe4,libmio-a1e1485aef1c3982,libparking_lot-c752e3a3c97426e6,libparking_lot_core-705b557ef01f2851,liblibc-ddb72a23c2a1ca6d,libcfg_if-1d45b984894660d1,libsmallvec-b772d09f0454fc46,liblock_api-bcbc1fe9d8d47e47,libscopeguard-bec5facf6943bfb2,libpin_project_lite-dc9a0de788b4cb26}.rlib" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*}.rlib" "-lunwind" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/liblibc-*.rlib" "-lc" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/{librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/app/target/release/deps/rustc4gFpKs/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-nostartfiles" "-L" "/app/target/release/build/ring-a58553958e033d28/out" "-L" "/app/target/release/build/aws-lc-sys-6dfdbd7cc089fc46/out" "-L" "/app/target/release/build/rdkafka-sys-6e6a6d1135bd4a6c/out/lib" "-L" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained" "-L" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib" "-o" "/app/target/release/deps/submission-87b42cc841a73650" "-Wl,--gc-sections" "-static" "-no-pie" "-Wl,-z,relro,-z,now" "-Wl,-O1" "-Wl,--strip-debug" "-nodefaultlibs" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crtend.o" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crtn.o"
+#14 1496.3   = note: some arguments are omitted. use `--verbose` to show all linker arguments
+#14 1496.3   = note: /usr/lib/gcc/aarch64-alpine-linux-musl/15.2.0/../../../../aarch64-alpine-linux-musl/bin/ld: cannot find -lz: No such file or directory
+#14 1496.3           /usr/lib/gcc/aarch64-alpine-linux-musl/15.2.0/../../../../aarch64-alpine-linux-musl/bin/ld: have you installed the static version of the z library ?
+#14 1496.3           collect2: error: ld returned 1 exit status
+#14 1496.3           
+#14 1496.3 
+#14 1496.7 error: could not compile `submission` (bin "submission") due to 1 previous error
+#14 ERROR: process "/bin/sh -c cargo build --release --locked" did not complete successfully: exit code: 101
+------
+ > [builder 5/5] RUN cargo build --release --locked:
+1496.3 error: linking with `cc` failed: exit status: 1
+1496.3   |
+1496.3   = note:  "cc" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crt1.o" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crti.o" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crtbegin.o" "/app/target/release/deps/rustc4gFpKs/symbols.o" "<17 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "/app/target/release/deps/{libanyhow-04fb4e67d5c35e76,libaws_config-e6b9066680ea5114,libsha1-bedad67bc2898935,libaws_sdk_ssooidc-973ee1308f6f8841,libaws_sdk_sso-6682c0cc50411f5c,libaws_sdk_sts-d6da619c6bcb689f,libaws_smithy_query-5a268f953525d5f3,liburlencoding-5c457cdc3317e8f1,libflate2-fb239ce6158cadd7,libminiz_oxide-d1b8fed361219862,libsimd_adler32-a3320915fc84c77b,libtar-064bd268717860c9,libxattr-745539fb8c3ea294,librustix-7cb27ccea1932f37,libbitflags-329b19043fefc657,liblinux_raw_sys-f320f8e690229b48,libfiletime-1aca881237553df8,librdkafka-99337592c7add707,librdkafka_sys-e1bd9ffa57aa2774,libnum_enum-db798fb1c92416c7,liblibz_sys-23afe4808ca2b44c}.rlib" "-lz" "/app/target/release/deps/{libaws_sdk_s3-3584f485c629440b,libarc_swap-a7372ebdad525386,libregex_lite-b27c6f484eed7e13,libaws_smithy_json-ec66f733c1434e61,liburl-0321864ee334b8d2,libidna-40536f531a798974,libidna_adapter-c6ab394af8a8d19c,libicu_properties-c9c7f3c365449a9e,libicu_properties_data-9c7d6ff18eada697,libicu_normalizer-c2007bca86d1d3ab,libicu_normalizer_data-40abf4234463f7f9,libicu_collections-c1b25168d6dbda27,libutf8_iter-2968e4c3e8379eda,libpotential_utf-8e754d44980fe976,libicu_provider-27b5b0b4e3ceab59,libicu_locale_core-0fa115740029a5d9,libtinystr-30aea74272d92ccc,liblitemap-ee9d88a3fcacae9f,libwriteable-3926ee70c0d54ea0,libzerovec-d78a375ba7a9320a,libzerotrie-5dfcb45f2e572ed6,libyoke-9b6535e3167bf660,libstable_deref_trait-b3cf341ef9a8ddd0,libzerofrom-15522feec5e60998,liblru-dc2c73228c8be9c8,libhashbrown-b3566ebcdfbfda78,liballocator_api2-3616bc67a6ddd1bc,libfoldhash-11cd77a4506c6685,libaws_smithy_xml-df5bb05bfb24060e,libxmlparser-c9711c8929ce30f7,libaws_smithy_checksums-07e4b36c19503668,libcrc_fast-7eade06762077b6d,libmd5-91f737588026bd4c,libsha1-21a38f6f3bc60907,libaws_runtime-e3d2c1d5cbc8c9bc,libuuid-4a5c3603de0349c0,libgetrandom-e0ced1d24a15d80b,libaws_sigv4-c166fde6c0efe1ab,libhex-8d6c82c67fac0d59,libp256-739b6adbe43dc92b,libsha2-788bfe312878c3ee,libecdsa-612193d06a109797,librfc6979-b8fc2d38ffe742ce,libhmac-22266edb8717c566,libsignature-24b3f4de06d384a5,libdigest-c03ab9bd666d265e,libblock_buffer-1067af97dd3096c3,libcrypto_common-8a15a82b0dc33710,libprimeorder-75a15d73bdf4f555,libelliptic_curve-f525e4fe76fafa0b,libsec1-4c03ac13a206e818,libpkcs8-4ac2d9bfba1ce21d,libspki-82412317fa561d4e,libder-8105149d488dbbfe,libpem_rfc7468-949d1a3422ced4ae,libbase64ct-6a712a538fed0354,libconst_oid-95d234336d68eb7e,libbase16ct-fd5741f36d7c5298,libgroup-e691d7206bbcfdfa,libff-ad3074005c8ad02b,libcrypto_bigint-1c61970954adc1cc,librand_core-e6ac19de932da98c,libgeneric_array-ac0ae49170c71815,libsha2-49377877c2680b2c,libcpufeatures-f7792d405f918262,libhmac-825c8497f96c0d17,libdigest-2de1abe1fc8482b6,libctutils-0c471db51b88aa83,libcmov-781bbe877e0ed021,libconst_oid-d25458d204172cbf,libcrypto_common-bda30eaf80578667,libblock_buffer-89dc1243ca54f480,libhybrid_array-8ec83133f16592d0,libtypenum-e279272a846a2cfa,libaws_smithy_http-f415b613c91f36ee,libaws_smithy_eventstream-7910d02113fcdb10,libcrc32fast-1e44000591a928df,libaws_types-f9fa9f1b9feab4fa,libaws_credential_types-02bfc3feaa191160,libaws_smithy_runtime-da79dab1d35f2eda,libfastrand-e70bf80254e9bc9b,libaws_smithy_schema-976fbc435e55546b,libaws_smithy_observability-79c5bfc84f4cbbab,libaws_smithy_http_client-5a4cc5b7bc87be15,libhyper_rustls-dfbd04ffacc5f5de,libtokio_rustls-3ad7a873b9f6e95c,librustls-1a48d91b77f0209c,libsubtle-b8be50ff316f0954,libwebpki-9b5087dace04239b,libaws_lc_rs-7289c6013e545863,libaws_lc_sys-0ecdc6f4bb0abbdf,librustls_native_certs-1f47c427bdf05c50,libopenssl_probe-8a4651c18e0039fb,librustls_pki_types-48e893d43f6826d9,libhyper_rustls-36d04da8ee8526ff,libtokio_rustls-e036fd43e05054a9,librustls-dcdd84f510bfcc46,libsct-65e4ec8437df32a9,libwebpki-b183dc45dfe18df8,libring-299083a14ef04b4f,libgetrandom-b338fe43637ca2b9,libuntrusted-efb365b240cfe1d0,libhyper-c0537b29e652017c,libsocket2-4ed63995d9a1bd97,libh2-dda3710520533e7f,libaws_smithy_runtime_api-7bcc77fb29c95f97,libaws_smithy_async-4ef7c3c70feb7cd6,libzeroize-a28c0b049ba1dc0a,libaws_smithy_types-3cb722e9dd2f0f92,libpin_utils-fd5c751858abc9cd,libtime-fae4e9fcd18b06fb,libtime_core-53ce9f74bb13e158,libnum_conv-61ae32c76f7e2834,libderanged-d47481b5ebf4ddc8,libpowerfmt-c6023cc2f33e21a7,libnum_integer-67280180fbbfe3ac,libnum_traits-4e588eb18795c349,libbytes_utils-eb3e8b9a07e9d5af,libeither-df5bdff79a15c0d7,libhttp_body-2f6f2dcdbafb775c,libhttp-ba0b89b4a3257a82,libbase64_simd-07e634006b164fa6,liboutref-e13757e20ce69acf,libvsimd-903572add7a73530,libaxum-5c0faed5e40352ed,libmulter-755f1ff8aa476adb,libspin-65ad6f144bb39bd1,libencoding_rs-dd8ad762e3b4e7e2,libserde_path_to_error-879e0181c9830515,libserde_json-e8656b3a72614061,libmemchr-f7f7a1bff49a7081,libzmij-46ad0e09572b0995,libserde_urlencoded-27871078e0ae6226,libryu-cabc8387cf341eb3,libform_urlencoded-6ba2029386861f42,libhyper_util-571696a4e24b43c1,libbase64-f0ca67832992aa8e,libpercent_encoding-6a3dca0ae744f256,libipnet-537f042e4460427a,libhyper-873a463b950d20b8,libwant-a839b9812969e550,libtry_lock-3fa3f2660565684b,libhttparse-d68654e7b00ef676,libh2-d7f3798a9d4dfb64,libindexmap-7da8316743dece04,libequivalent-d3b7b25daa03cb0c,libhashbrown-c906cb25b5e9d144,libslab-08a6f01fe5a842f7,libfnv-ea3e79771e332938,libtokio_util-c50bd9644b5863bc,libfutures_sink-e28d9a06a1db1760,libatomic_waker-f8e72c6fc302729b,libhttpdate-63b02e990b803b33,libfutures_channel-ef9b8db25d4d610a,libmatchit-338b18b96a5bc005,libserde-6228b196fc95c80c,libserde_core-bdd575ac188db782,libaxum_core-f1ec647365b5d4ec,libmime-ec8d6f26ec28fd3b,libhttp_body_util-c04aa4212a7a28bf,libhttp_body-542422c372818ad9,libhttp-1cd2f38fe7e9e191,libitoa-0433a59117baec68,libtracing-8c485e23bb211ef8,liblog-2b26f71e71d5a9b7,libtracing_core-4a36d46516f0ec98,libonce_cell-169a8346f37920c8,libtower-941c33cf5c24b522,libsync_wrapper-9f65761a341e634a,libtower_layer-8164413a753c38d4,libfutures_util-4bac83b5d281b468,libfutures_task-a4b2d7e88af95e15,libfutures_core-129cbe19ef778b81,libtower_service-43fbf8fbce898d6f,libtokio-7b3503dc392936da,libsignal_hook_registry-85340d10446197dd,liberrno-bcef5a10de09d200,libsocket2-a0bf62a7b84706d6,libbytes-53ce709797c1efe4,libmio-a1e1485aef1c3982,libparking_lot-c752e3a3c97426e6,libparking_lot_core-705b557ef01f2851,liblibc-ddb72a23c2a1ca6d,libcfg_if-1d45b984894660d1,libsmallvec-b772d09f0454fc46,liblock_api-bcbc1fe9d8d47e47,libscopeguard-bec5facf6943bfb2,libpin_project_lite-dc9a0de788b4cb26}.rlib" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/{libstd-*,libpanic_unwind-*,libobject-*,libmemchr-*,libaddr2line-*,libgimli-*,libcfg_if-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libminiz_oxide-*,libadler2-*,libunwind-*}.rlib" "-lunwind" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/liblibc-*.rlib" "-lc" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/{librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/app/target/release/deps/rustc4gFpKs/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-nostartfiles" "-L" "/app/target/release/build/ring-a58553958e033d28/out" "-L" "/app/target/release/build/aws-lc-sys-6dfdbd7cc089fc46/out" "-L" "/app/target/release/build/rdkafka-sys-6e6a6d1135bd4a6c/out/lib" "-L" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained" "-L" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib" "-o" "/app/target/release/deps/submission-87b42cc841a73650" "-Wl,--gc-sections" "-static" "-no-pie" "-Wl,-z,relro,-z,now" "-Wl,-O1" "-Wl,--strip-debug" "-nodefaultlibs" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crtend.o" "<sysroot>/lib/rustlib/aarch64-unknown-linux-musl/lib/self-contained/crtn.o"
+1496.3   = note: some arguments are omitted. use `--verbose` to show all linker arguments
+1496.3   = note: /usr/lib/gcc/aarch64-alpine-linux-musl/15.2.0/../../../../aarch64-alpine-linux-musl/bin/ld: cannot find -lz: No such file or directory
+1496.3           /usr/lib/gcc/aarch64-alpine-linux-musl/15.2.0/../../../../aarch64-alpine-linux-musl/bin/ld: have you installed the static version of the z library ?
+1496.3           collect2: error: ld returned 1 exit status
+1496.3           
+1496.3 
+1496.7 error: could not compile `submission` (bin "submission") due to 1 previous error
+------
+Dockerfile:5
+--------------------
+   3 |     WORKDIR /app
+   4 |     COPY . .
+   5 | >>> RUN cargo build --release --locked
+   6 |     
+   7 |     FROM alpine:latest
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c cargo build --release --locked" did not complete successfully: exit code: 101
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/p017foltp0nhmoc3igjdcg6zl

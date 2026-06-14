@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .parse()
     .expect("PORT must be a valid u16");
 
-    let addr = format!("[::1]:{}", port).parse().unwrap();
+    let addr = format!("0.0.0.0:{}", port).parse().unwrap();
     println!("Bot Worker listening on {}", addr);
 
     Server::builder()

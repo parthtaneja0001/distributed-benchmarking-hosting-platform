@@ -1,0 +1,7 @@
+image:
+  repository: bot-worker
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  KAFKA_BROKER: redpanda-0.redpanda.default.svc.cluster.local:9092

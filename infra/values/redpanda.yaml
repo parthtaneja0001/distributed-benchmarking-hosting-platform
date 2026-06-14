@@ -1,0 +1,11 @@
+statefulset:
+  replicas: 1
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+tls:
+  enabled: false
+external:
+  enabled: false
