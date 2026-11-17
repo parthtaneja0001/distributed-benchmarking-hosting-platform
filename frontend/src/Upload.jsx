@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { UPLOAD_URL, HAS_UPLOAD_BACKEND } from './config'
+import { detectLanguage, languageLabel } from './detectLanguage'
+import { addSubmission } from './demoStore'
 import {
   IconUpload,
   IconFile,
@@ -7,6 +9,8 @@ import {
   IconCheck,
   IconAlert,
 } from './icons'
+
+const MAX_BYTES = 50 * 1024 * 1024
 
 function formatBytes(bytes) {
   if (!bytes) return '0 B'
@@ -21,7 +25,7 @@ function randomId() {
   ).slice(0, 32)
 }
 
-function Upload() {
+function Upload({ onViewLeaderboard }) {
   const [file, setFile] = useState(null)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -30,8 +34,19 @@ function Upload() {
 
   const selectFile = (f) => {
     if (!f) return
-    setFile(f)
     setResult(null)
+    // Drag-and-drop bypasses the input's `accept` filter, so validate here.
+    if (!/\.(tar\.gz|tgz)$/i.test(f.name)) {
+      setFile(null)
+      setError(`"${f.name}" is not a .tar.gz archive.`)
+      return
+    }
+    if (f.size > MAX_BYTES) {
+      setFile(null)
+      setError(`File is ${formatBytes(f.size)} — the limit is 50 MB.`)
+      return
+    }
+    setFile(f)
     setError(null)
   }
 
@@ -41,22 +56,27 @@ function Upload() {
     setError(null)
   }
 
-  // Demo submission used when no backend is configured.
-  const simulateSubmit = () => {
+  // Demo submission used when no backend is configured: detect the language
+  // in the browser (same rules as the backend) and queue a simulated run that
+  // shows up on the leaderboard.
+  const simulateSubmit = async () => {
     setLoading(true)
     setError(null)
     setResult(null)
-    const lang = /\.rs|rust/i.test(file.name)
-      ? 'Rust'
-      : /\.cpp|\.cc|cpp/i.test(file.name)
-        ? 'C++'
-        : /\.go/i.test(file.name)
-          ? 'Go'
-          : 'auto-detected'
-    setTimeout(() => {
-      setResult({ id: randomId(), language: lang, demo: true })
+    const [language] = await Promise.all([
+      detectLanguage(file),
+      new Promise((r) => setTimeout(r, 600)),
+    ])
+    if (language === null) {
+      setError(`"${file.name}" could not be read as a gzipped tar archive.`)
       setLoading(false)
-    }, 900)
+      return
+    }
+    const id = randomId()
+    const base = file.name.replace(/\.(tar\.gz|tgz)$/i, '')
+    addSubmission({ id, name: `${base}-${id.slice(0, 6)}`, language, submittedAt: Date.now() })
+    setResult({ id, language, demo: true })
+    setLoading(false)
   }
 
   const handleSubmit = (e) => {
@@ -77,15 +97,17 @@ function Upload() {
     xhr.open('POST', UPLOAD_URL)
 
     xhr.onload = () => {
+      let data = null
       try {
-        const data = JSON.parse(xhr.responseText)
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setResult(data)
-        } else {
-          setError(data.error || `Upload failed (HTTP ${xhr.status})`)
-        }
+        data = JSON.parse(xhr.responseText)
       } catch {
-        setError('Received an invalid response from the server.')
+        /* non-JSON body (e.g. a proxy error page) */
+      }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        if (data && data.id) setResult(data)
+        else setError('Received an invalid response from the server.')
+      } else {
+        setError(data?.error || `Upload failed (HTTP ${xhr.status})`)
       }
       setLoading(false)
     }
@@ -142,8 +164,12 @@ function Upload() {
             <span className="dropzone-hint">Maximum 50 MB · .tar.gz</span>
             <input
               type="file"
-              accept=".tar.gz,application/gzip,application/x-gzip"
-              onChange={(e) => selectFile(e.target.files?.[0])}
+              accept=".tar.gz,.tgz,application/gzip,application/x-gzip"
+              onChange={(e) => {
+                selectFile(e.target.files?.[0])
+                // Reset so re-selecting the same file still fires onChange.
+                e.target.value = ''
+              }}
             />
           </label>
 
@@ -187,12 +213,19 @@ function Upload() {
                   ID<code>{(result.id || '').slice(0, 12)}…</code>
                 </span>
                 <span className="result-meta-item">
-                  Language<code>{result.language || 'detected'}</code>
+                  Language<code>{languageLabel(result.language)}</code>
                 </span>
                 <span className="result-meta-item">
-                  Status<code>building</code>
+                  Status<code>{result.demo ? 'benchmarking' : 'building'}</code>
                 </span>
               </div>
+              {onViewLeaderboard && (
+                <div className="result-actions">
+                  <button type="button" className="btn btn-ghost" onClick={onViewLeaderboard}>
+                    View on leaderboard
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

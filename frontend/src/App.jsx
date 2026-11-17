@@ -42,7 +42,11 @@ function App() {
 
       <main className="main">
         <div className="container">
-          {page === 'upload' ? <Upload /> : <Leaderboard />}
+          {page === 'upload' ? (
+            <Upload onViewLeaderboard={() => setPage('leaderboard')} />
+          ) : (
+            <Leaderboard />
+          )}
         </div>
       </main>
 

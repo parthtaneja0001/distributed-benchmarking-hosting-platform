@@ -1,13 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { WS_URL, HAS_WS_BACKEND } from './config'
-import { generateDemoEntries, jitterEntries } from './demoData'
+import {
+  generateDemoEntries,
+  jitterEntries,
+  makeSubmissionEntry,
+  rerank,
+} from './demoData'
+import { BENCHMARK_MS, loadSubmissions, onSubmissionsChange } from './demoStore'
+import { languageLabel } from './detectLanguage'
 import { IconGauge, IconZap, IconTarget, IconActivity } from './icons'
 
 const COLUMNS = 8
 
 function formatNum(n) {
-  if (n == null) return '—'
-  return n.toLocaleString('en-US')
+  if (n == null || !Number.isFinite(n)) return '—'
+  // Live TPS arrives as a float from the leaderboard service.
+  return Math.round(n).toLocaleString('en-US')
+}
+
+function truncate(id) {
+  return id?.length > 22 ? id.slice(0, 20) + '…' : id
 }
 
 function rankClass(rank) {
@@ -28,6 +40,8 @@ function Leaderboard() {
   // status: 'connecting' | 'live' | 'offline' | 'demo'
   const [status, setStatus] = useState(HAS_WS_BACKEND ? 'connecting' : 'demo')
   const [updatedAt, setUpdatedAt] = useState(null)
+  // Demo-mode uploads whose simulated benchmark is still running.
+  const [pending, setPending] = useState([])
 
   // Refs keep reconnect timers/sockets stable across StrictMode re-runs.
   const wsRef = useRef(null)
@@ -38,18 +52,40 @@ function Leaderboard() {
   useEffect(() => {
     let cancelled = false
 
+    // Demo-mode state: simulated board plus anything uploaded in demo mode.
+    let current = []
+    let unsubscribe = null
+
+    // Move demo uploads from "Benchmarking…" onto the board once their
+    // simulated run has finished.
+    const syncSubmissions = () => {
+      const now = Date.now()
+      const subs = loadSubmissions()
+      const onBoard = new Set(current.map((e) => e.test_id))
+      const finished = subs.filter(
+        (s) => now - s.submittedAt >= BENCHMARK_MS && !onBoard.has(s.name),
+      )
+      if (finished.length) {
+        current = rerank([...current, ...finished.map(makeSubmissionEntry)])
+      }
+      setPending(subs.filter((s) => now - s.submittedAt < BENCHMARK_MS))
+      setEntries(current)
+      setUpdatedAt(new Date())
+    }
+
     // Starts the simulated data stream. Idempotent — a running demo is reused.
     const startDemo = () => {
       if (demoRef.current) return
-      let current = generateDemoEntries(8)
-      setEntries(current)
-      setUpdatedAt(new Date())
+      current = generateDemoEntries(8)
       setStatus('demo')
+      syncSubmissions()
+      let tick = 0
       demoRef.current = setInterval(() => {
-        current = jitterEntries(current)
-        setEntries(current)
-        setUpdatedAt(new Date())
-      }, 2000)
+        // Jitter every 2s; check for finished submissions every 1s.
+        if (++tick % 2 === 0) current = jitterEntries(current)
+        syncSubmissions()
+      }, 1000)
+      unsubscribe = onSubmissionsChange(syncSubmissions)
     }
 
     const stopDemo = () => {
@@ -57,6 +93,11 @@ function Leaderboard() {
         clearInterval(demoRef.current)
         demoRef.current = null
       }
+      if (unsubscribe) {
+        unsubscribe()
+        unsubscribe = null
+      }
+      setPending([])
     }
 
     // ---- No backend configured: demo only ----
@@ -87,6 +128,9 @@ function Leaderboard() {
       ws.onopen = () => {
         if (cancelled) return
         attemptsRef.current = 0
+        clearTimeout(fallbackTimer)
+        // Drop any simulated rows so they are never shown under a "Live" badge.
+        if (demoRef.current) setEntries([])
         stopDemo()
         setStatus('live')
       }
@@ -186,7 +230,9 @@ function Leaderboard() {
           <div className="stat-label">
             <IconTarget width={13} height={13} /> Top score
           </div>
-          <div className="stat-value">{leader ? leader.score.toFixed(1) : '—'}</div>
+          <div className="stat-value">
+            {leader && Number.isFinite(leader.score) ? leader.score.toFixed(1) : '—'}
+          </div>
         </div>
         <div className="stat">
           <div className="stat-label">
@@ -224,9 +270,9 @@ function Leaderboard() {
               <th>Engine</th>
               <th>Lang</th>
               <th className="num">TPS</th>
-              <th className="num">p50 µs</th>
-              <th className="num">p90 µs</th>
-              <th className="num">p99 µs</th>
+              <th className="num">p50 <span className="unit-raw">µs</span></th>
+              <th className="num">p90 <span className="unit-raw">µs</span></th>
+              <th className="num">p99 <span className="unit-raw">µs</span></th>
               <th className="num">Correctness</th>
             </tr>
           </thead>
@@ -250,19 +296,34 @@ function Leaderboard() {
                 </tr>
               )
             ) : (
-              entries.map((entry) => {
+              <>
+              {pending.map((sub) => (
+                <tr key={sub.id} className="row-mine">
+                  <td>
+                    <span className="rank">—</span>
+                  </td>
+                  <td className="mono" title={sub.name}>
+                    {truncate(sub.name)}
+                    <span className="you-tag">you</span>
+                  </td>
+                  <td>{languageLabel(sub.language)}</td>
+                  <td colSpan={COLUMNS - 3} className="pending-cell">
+                    <span className="spinner" /> Benchmarking…
+                  </td>
+                </tr>
+              ))}
+              {entries.map((entry) => {
                 const c = entry.correctness
                 return (
-                  <tr key={entry.test_id}>
+                  <tr key={entry.test_id} className={entry.mine ? 'row-mine' : undefined}>
                     <td>
                       <span className={rankClass(entry.rank)}>{entry.rank}</span>
                     </td>
                     <td className="mono" title={entry.test_id}>
-                      {entry.test_id?.length > 22
-                        ? entry.test_id.slice(0, 20) + '…'
-                        : entry.test_id}
+                      {truncate(entry.test_id)}
+                      {entry.mine && <span className="you-tag">you</span>}
                     </td>
-                    <td>{entry.language || '—'}</td>
+                    <td>{languageLabel(entry.language)}</td>
                     <td className="num mono">{formatNum(entry.tps)}</td>
                     <td className="num mono">{entry.p50_us ?? '—'}</td>
                     <td className="num mono">{entry.p90_us ?? '—'}</td>
@@ -284,7 +345,8 @@ function Leaderboard() {
                     </td>
                   </tr>
                 )
-              })
+              })}
+              </>
             )}
           </tbody>
         </table>

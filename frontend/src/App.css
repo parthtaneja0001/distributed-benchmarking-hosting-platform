@@ -544,6 +544,11 @@ thead th {
   white-space: nowrap;
 }
 
+/* Uppercasing "µ" yields Greek capital "Μ", which reads as "MS". */
+thead th .unit-raw {
+  text-transform: none;
+}
+
 th.num,
 td.num {
   text-align: right;
@@ -633,6 +638,8 @@ tbody tr:hover td {
 }
 
 .bar-fill {
+  /* It's a <span>; without block display width/height are ignored. */
+  display: block;
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
@@ -744,4 +751,39 @@ tbody tr:hover td {
   .card {
     padding: 1.25rem;
   }
+}
+
+/* Rows for the viewer's own demo-mode submissions */
+tbody tr.row-mine td {
+  background: var(--accent-bg);
+}
+
+.you-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.68rem;
+  vertical-align: middle;
+}
+
+.pending-cell {
+  color: var(--accent);
+}
+
+.pending-cell .spinner {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-right: 0.4rem;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent-border);
+  border-top-color: var(--accent);
+}
+
+.result-actions {
+  margin-top: 0.75rem;
 }

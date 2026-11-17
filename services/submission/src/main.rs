@@ -29,13 +29,15 @@ async fn handle_upload(
         .and_then(|val| val.to_str().ok())
         .unwrap_or("");
 
-    if !content_type.starts_with("multipart/form-data") {
-        return (StatusCode::BAD_REQUEST, Json(json!({"error": "expected multipart/form-data"})));
-    }
-
-    let boundary = content_type
-        .trim_start_matches("multipart/form-data; boundary=")
-        .to_string();
+    // parse_boundary handles parameter order, quoting and extra params
+    // (e.g. `multipart/form-data; charset=utf-8; boundary="x"`), which a
+    // plain prefix-trim does not.
+    let boundary = match multer::parse_boundary(content_type) {
+        Ok(b) => b,
+        Err(_) => {
+            return (StatusCode::BAD_REQUEST, Json(json!({"error": "expected multipart/form-data with a boundary"})));
+        }
+    };
 
     // Create a stream from the bytes
     let bytes_stream = stream::once(async move { Ok::<_, std::io::Error>(body.clone()) });

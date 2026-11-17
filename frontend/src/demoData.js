@@ -62,3 +62,47 @@ export function jitterEntries(entries) {
   next.sort((a, b) => b.score - a.score)
   return next.map((e, idx) => ({ ...e, rank: idx + 1 }))
 }
+
+export function rerank(entries) {
+  const next = [...entries].sort((a, b) => b.score - a.score)
+  return next.map((e, idx) => ({ ...e, rank: idx + 1 }))
+}
+
+// Deterministic PRNG so a given submission always gets the same base numbers.
+function seeded(seedStr) {
+  let h = 1779033703 ^ seedStr.length
+  for (let i = 0; i < seedStr.length; i++) {
+    h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353)
+    h = (h << 13) | (h >>> 19)
+  }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 2246822507)
+    h = Math.imul(h ^ (h >>> 13), 3266489909)
+    h ^= h >>> 16
+    return (h >>> 0) / 4294967296
+  }
+}
+
+const SUB_LANG_LABELS = { go: 'Go', rust: 'Rust', cpp: 'C++' }
+
+/** Simulated benchmark result for a demo-mode upload. */
+export function makeSubmissionEntry(sub) {
+  const r = seeded(sub.id)
+  const between = (min, max) => Math.round(min + r() * (max - min))
+  const p50 = between(5, 35)
+  const p90 = p50 + between(5, 25)
+  const p99 = p90 + between(10, 70)
+  const tps = between(150000, 900000)
+  const correctness = Number((0.9 + r() * 0.1).toFixed(4))
+  return {
+    test_id: sub.name,
+    language: SUB_LANG_LABELS[sub.language] ?? 'Unknown',
+    tps,
+    p50_us: p50,
+    p90_us: p90,
+    p99_us: p99,
+    correctness,
+    score: (tps / 1000) * correctness - p99 * 2,
+    mine: true,
+  }
+}
