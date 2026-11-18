@@ -141,21 +141,20 @@ function Leaderboard() {
       }
       wsRef.current = ws
 
-      ws.onopen = () => {
-        if (cancelled) return
-        attemptsRef.current = 0
-        clearTimeout(fallbackTimer)
-        // Drop any simulated rows so they are never shown under a "Live" badge.
-        if (demoRef.current) setEntries([])
-        stopDemo()
-        setStatus('live')
-      }
+      // An open socket alone doesn't mean the backend works: if its data store
+      // is down (e.g. Docker stopped) the server accepts the connection and
+      // then closes it without sending anything. Switching to "Live" on open
+      // made the board flicker between an empty live view and demo data, so
+      // we only go live (and reset the retry backoff) once real data arrives.
+      ws.onopen = () => {}
 
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
           const list = Array.isArray(data) ? data : data.entries
           if (Array.isArray(list)) {
+            attemptsRef.current = 0
+            clearTimeout(fallbackTimer)
             stopDemo()
             setStatus('live')
             const mine = loadMySubmissionIds()
