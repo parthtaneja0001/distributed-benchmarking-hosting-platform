@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:latest
@@ -7,24 +5,29 @@ services:
     command:
       - redpanda start
       - --smp 1
+      - --memory 512M
       - --reserve-memory 0M
       - --overprovisioned
       - --node-id 0
       - --kafka-addr PLAINTEXT://0.0.0.0:9092
-      - --advertise-kafka-addr PLAINTEXT://localhost:9092
+      - --advertise-kafka-addr PLAINTEXT://127.0.0.1:9092
+      - --set redpanda.auto_create_topics_enabled=true
+    # Bound to loopback: nothing here has auth, so keep it off the LAN.
     ports:
-      - "9092:9092"
-      - "9644:9644"
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:9644:9644"
 
   redis:
     image: redis:7-alpine
     container_name: redis
+    command: ["redis-server", "--maxmemory", "128mb"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
   timescaledb:
     image: timescale/timescaledb:latest-pg15
     container_name: timescaledb
+    profiles: ["extra"] # not used by the pipeline yet; `--profile extra` to start
     environment:
       POSTGRES_PASSWORD: hackathon
       POSTGRES_DB: iicpc
@@ -33,19 +36,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  minio:
-    image: minio/minio
-    container_name: minio
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"    # S3 API
-      - "9001:9001"    # Web console
+  # S3-compatible object store for submission tarballs. (The minio/minio
+  # image is no longer published on Docker Hub; s3mock speaks the same S3 API
+  # on the same port, so the services need no changes.)
+  s3:
+    image: adobe/s3mock:4.7.0
+    container_name: s3
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - minio_data:/data
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: submissions
+      initialBuckets: submissions
+    ports:
+      - "127.0.0.1:9000:9090"
 
 volumes:
   pgdata:
-  minio_data:

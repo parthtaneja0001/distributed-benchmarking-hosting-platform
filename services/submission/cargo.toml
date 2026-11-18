@@ -18,3 +18,4 @@ aws-sdk-s3 = "1"
 multer = "3"
 aws-config = { version = "1", features = ["behavior-version-latest"] }
 anyhow = "1"
+redis = { version = "0.27", features = ["tokio-comp"] }

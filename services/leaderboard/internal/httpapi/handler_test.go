@@ -52,3 +52,39 @@ func TestLeaderboardRanksByScoreDescending(t *testing.T) {
 		t.Fatalf("top entry = %+v, want fast rank 1", response.Entries[0])
 	}
 }
+
+type fakeStoreWithSubs struct {
+	fakeMetricsStore
+	subs map[string]model.Submission
+}
+
+func (s fakeStoreWithSubs) Submissions(context.Context) (map[string]model.Submission, error) {
+	return s.subs, nil
+}
+
+func TestLeaderboardMergesSubmissionMetadataAndPending(t *testing.T) {
+	c := 0.98
+	service := leaderboard.NewService(fakeStoreWithSubs{
+		fakeMetricsStore: fakeMetricsStore{items: []model.LatestMetrics{
+			{TestID: "done", TPS: 500, Correctness: &c},
+		}},
+		subs: map[string]model.Submission{
+			"done":  {ID: "done", Name: "engine-a", Language: "go"},
+			"build": {ID: "build", Name: "engine-b", Language: "rust", Status: "building"},
+		},
+	}, scoring.ProvisionalScorer{})
+
+	resp, err := service.Current(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Entries) != 1 || resp.Entries[0].Name != "engine-a" || resp.Entries[0].Language != "go" {
+		t.Fatalf("entries = %+v", resp.Entries)
+	}
+	if resp.Entries[0].Correctness == nil || *resp.Entries[0].Correctness != c {
+		t.Fatalf("correctness not passed through: %+v", resp.Entries[0])
+	}
+	if len(resp.Pending) != 1 || resp.Pending[0].ID != "build" {
+		t.Fatalf("pending = %+v", resp.Pending)
+	}
+}

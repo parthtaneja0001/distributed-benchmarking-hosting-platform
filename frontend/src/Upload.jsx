@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { UPLOAD_URL, HAS_UPLOAD_BACKEND } from './config'
 import { detectLanguage, languageLabel } from './detectLanguage'
-import { addSubmission } from './demoStore'
+import { addSubmission, rememberMySubmission } from './demoStore'
 import {
   IconUpload,
   IconFile,
@@ -104,7 +104,10 @@ function Upload({ onViewLeaderboard }) {
         /* non-JSON body (e.g. a proxy error page) */
       }
       if (xhr.status >= 200 && xhr.status < 300) {
-        if (data && data.id) setResult(data)
+        if (data && data.id) {
+          rememberMySubmission(data.id)
+          setResult(data)
+        }
         else setError('Received an invalid response from the server.')
       } else {
         setError(data?.error || `Upload failed (HTTP ${xhr.status})`)
@@ -216,7 +219,7 @@ function Upload({ onViewLeaderboard }) {
                   Language<code>{languageLabel(result.language)}</code>
                 </span>
                 <span className="result-meta-item">
-                  Status<code>{result.demo ? 'benchmarking' : 'building'}</code>
+                  Status<code>{result.demo ? 'benchmarking' : 'queued'}</code>
                 </span>
               </div>
               {onViewLeaderboard && (

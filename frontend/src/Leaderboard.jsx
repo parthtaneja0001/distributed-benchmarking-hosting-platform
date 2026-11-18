@@ -6,7 +6,12 @@ import {
   makeSubmissionEntry,
   rerank,
 } from './demoData'
-import { BENCHMARK_MS, loadSubmissions, onSubmissionsChange } from './demoStore'
+import {
+  BENCHMARK_MS,
+  loadMySubmissionIds,
+  loadSubmissions,
+  onSubmissionsChange,
+} from './demoStore'
 import { languageLabel } from './detectLanguage'
 import { IconGauge, IconZap, IconTarget, IconActivity } from './icons'
 
@@ -16,6 +21,13 @@ function formatNum(n) {
   if (n == null || !Number.isFinite(n)) return '—'
   // Live TPS arrives as a float from the leaderboard service.
   return Math.round(n).toLocaleString('en-US')
+}
+
+const PENDING_LABELS = {
+  queued: 'Queued…',
+  building: 'Building in sandbox…',
+  running: 'Benchmarking…',
+  failed: 'Failed',
 }
 
 function truncate(id) {
@@ -68,7 +80,11 @@ function Leaderboard() {
       if (finished.length) {
         current = rerank([...current, ...finished.map(makeSubmissionEntry)])
       }
-      setPending(subs.filter((s) => now - s.submittedAt < BENCHMARK_MS))
+      setPending(
+        subs
+          .filter((s) => now - s.submittedAt < BENCHMARK_MS)
+          .map((s) => ({ ...s, status: 'running', mine: true })),
+      )
       setEntries(current)
       setUpdatedAt(new Date())
     }
@@ -142,7 +158,14 @@ function Leaderboard() {
           if (Array.isArray(list)) {
             stopDemo()
             setStatus('live')
-            setEntries(list)
+            const mine = loadMySubmissionIds()
+            setEntries(list.map((e) => ({ ...e, mine: mine.has(e.test_id) })))
+            setPending(
+              (Array.isArray(data.pending) ? data.pending : []).map((p) => ({
+                ...p,
+                mine: mine.has(p.id),
+              })),
+            )
             setUpdatedAt(new Date())
           }
         } catch (err) {
@@ -277,7 +300,7 @@ function Leaderboard() {
             </tr>
           </thead>
           <tbody>
-            {!hasData && status !== 'demo' ? (
+            {!hasData && pending.length === 0 && status !== 'demo' ? (
               status === 'connecting' ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="skeleton-row">
@@ -297,21 +320,32 @@ function Leaderboard() {
               )
             ) : (
               <>
-              {pending.map((sub) => (
-                <tr key={sub.id} className="row-mine">
-                  <td>
-                    <span className="rank">—</span>
-                  </td>
-                  <td className="mono" title={sub.name}>
-                    {truncate(sub.name)}
-                    <span className="you-tag">you</span>
-                  </td>
-                  <td>{languageLabel(sub.language)}</td>
-                  <td colSpan={COLUMNS - 3} className="pending-cell">
-                    <span className="spinner" /> Benchmarking…
-                  </td>
-                </tr>
-              ))}
+              {pending.map((sub) => {
+                const failed = sub.status === 'failed'
+                return (
+                  <tr key={sub.id} className={sub.mine ? 'row-mine' : undefined}>
+                    <td>
+                      <span className="rank">—</span>
+                    </td>
+                    <td className="mono" title={sub.name || sub.id}>
+                      {truncate(sub.name || sub.id)}
+                      {sub.mine && <span className="you-tag">you</span>}
+                    </td>
+                    <td>{languageLabel(sub.language)}</td>
+                    <td
+                      colSpan={COLUMNS - 3}
+                      className={`pending-cell${failed ? ' failed' : ''}`}
+                      title={sub.error || undefined}
+                    >
+                      {!failed && <span className="spinner" />}
+                      {PENDING_LABELS[sub.status] ?? 'Benchmarking…'}
+                      {failed && sub.error && (
+                        <span className="pending-error">{sub.error}</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
               {entries.map((entry) => {
                 const c = entry.correctness
                 return (
@@ -319,8 +353,8 @@ function Leaderboard() {
                     <td>
                       <span className={rankClass(entry.rank)}>{entry.rank}</span>
                     </td>
-                    <td className="mono" title={entry.test_id}>
-                      {truncate(entry.test_id)}
+                    <td className="mono" title={entry.name || entry.test_id}>
+                      {truncate(entry.name || entry.test_id)}
                       {entry.mine && <span className="you-tag">you</span>}
                     </td>
                     <td>{languageLabel(entry.language)}</td>

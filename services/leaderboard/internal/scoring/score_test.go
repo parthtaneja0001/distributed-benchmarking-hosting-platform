@@ -19,3 +19,12 @@ func TestProvisionalScorerPenalizesLatencyAndFailures(t *testing.T) {
 		t.Fatalf("score = %v, want %v", score, want)
 	}
 }
+
+func TestProvisionalScorerWeightsByCorrectness(t *testing.T) {
+	p99 := uint64(2_000)
+	c := 0.5
+	score := ProvisionalScorer{}.Score(model.LatestMetrics{TPS: 1000, P99US: &p99, Correctness: &c})
+	if want := 498.0; score != want {
+		t.Fatalf("score = %v, want %v", score, want)
+	}
+}

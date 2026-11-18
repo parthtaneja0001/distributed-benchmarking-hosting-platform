@@ -22,7 +22,16 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
         let req = request.into_inner();
         println!("Received test request: {:?}", req);
 
-        let test_id = uuid::Uuid::new_v4().to_string();
+        // All workers in one run report under the submission id so the
+        // leaderboard shows one row per submission, not one per worker.
+        let test_id = if req.test_id.is_empty() {
+            uuid::Uuid::new_v4().to_string()
+        } else {
+            req.test_id.clone()
+        };
+        // Unique per worker+run so order ids never collide across workers
+        // sharing a test_id (the shadow book keys orders by id).
+        let run_tag = uuid::Uuid::new_v4().simple().to_string()[..8].to_string();
         let endpoint = req.endpoint.clone();
         let num_traders = req.num_traders.max(1) as u32;
         let duration_secs = req.duration_secs.max(1);
@@ -53,6 +62,7 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
                 let test_id = test_id_clone.clone();
                 let order_tx = order_tx.clone();   
                 let fill_tx = fill_tx.clone();    
+                let run_tag = run_tag.clone();
 
                 let handle = tokio::spawn(connection::run_bot(
                     endpoint,
@@ -63,6 +73,7 @@ impl fleet::bot_worker_server::BotWorker for BotWorkerService {
                     tx,
                     order_tx,                    
                     fill_tx,                     
+                    run_tag,
                 ));
                 handles.push(handle);
             }

@@ -206,106 +206,74 @@ Reported metrics:
 - p99
 
 ### Throughput
-Successful orders processed per second.
+Acknowledged orders per second, measured over the run's active span using the
+bots' own ack timestamps (not the ingester's processing time).
 
 ### Correctness
-A shadow matching engine validates fills against expected outcomes using price‑time priority.
+Many bots send orders concurrently, so the order in which the engine sees them
+differs from the order on the `orders.sent` topic. Correctness therefore uses
+checks that hold regardless of arrival order (`services/telemetry/src/validation.rs`):
+
+- every reported fill belongs to an order that was actually sent,
+- a limit order is never filled at a worse price than its limit,
+- an order is never filled for more than its quantity,
+- total fill volume agrees with what a reference price-time book expects.
+
+`correctness = valid_fill_share × volume_agreement` (0–1). A correct engine scores
+1.0; for example, an engine that re-rests fully filled orders (double fills) or
+treats market orders as limits scores noticeably lower.
 
 ### Composite Score
 ```text
-score = TPS
-
-- (p99_us / 1000)
-- (failures * 10)
-
-- (correctness * 50)
+score = TPS × correctness − p99_us / 1000 − failures × 10
 ```
 
-This rewards:
-- High throughput
-- Low tail latency
-- High correctness
-
-The scoring function is pluggable.
+This rewards high throughput, high correctness and low tail latency. The scoring
+function is pluggable (`services/leaderboard/internal/scoring`).
 
 ---
 
 ## Setup & Deployment
 
-### 1. Start Infrastructure
+### Run the whole backend (one command)
+
+Requires Docker Desktop, Rust, Go and `cloudflared` (`brew install cloudflared`).
 
 ```bash
-docker compose up -d
+infra/scripts/backend-up.sh
 ```
 
-### 2. Create MinIO Bucket
-Open `http://localhost:9001`
-
-Credentials:
+This starts Redpanda, Redis and an S3-compatible store in Docker, builds and starts
+all services (submission :3000, leaderboard :8081, orchestrator in Docker mode,
+fleet manager, two bot workers, telemetry), and opens two free Cloudflare quick
+tunnels. It prints the public URLs:
 
 ```text
-username: minioadmin
-password: minioadmin
+VITE_UPLOAD_URL=https://<random>.trycloudflare.com/upload
+VITE_WS_URL=wss://<random>.trycloudflare.com/ws/leaderboard
 ```
 
-Create a bucket named: `submissions`
+Set those two variables on the Vercel project and redeploy, or run with
+`VERCEL_TOKEN=<token> infra/scripts/backend-up.sh` to do it automatically
+(uses `frontend/.vercel/project.json`). Tunnels are reused while they keep
+running, so the URLs only change after a restart.
 
-### 3. Start Services
-
-**Submission Service**
+Stop everything (add `--quit` to also quit Docker Desktop):
 
 ```bash
-cd services/submission
-./run.sh
+infra/scripts/backend-down.sh
 ```
 
-**Sandbox Orchestrator**
+Logs are in `.run/*.log`. Submissions are benchmarked one at a time:
+build in a locked-down container (no capabilities, 512 MB, 1 CPU, 256 pids,
+loopback-only port), 30 s of load, then the container and image are removed.
 
-```bash
-cd services/sandbox-orchestrator
-DEPLOY_MODE=docker go run cmd/main.go
-```
-
-**Bot Worker #1**
-
-```bash
-cd services/bot-fleet
-cargo run -p bot-worker
-```
-
-**Optional Bot Worker #2**
-
-```bash
-cd services/bot-fleet
-PORT=50052 cargo run -p bot-worker
-```
-
-**Fleet Manager**
-
-```bash
-cd services/bot-fleet
-BOT_WORKER_ADDRESSES="http://[::1]:50051,http://[::1]:50052" cargo run -p fleet-manager
-```
-
-**Telemetry Ingester**
-
-```bash
-cd services/telemetry
-cargo run
-```
-
-**Leaderboard**
-
-```bash
-cd services/leaderboard
-go run cmd/main.go
-```
-
-**Frontend**
+### Frontend locally
 
 ```bash
 cd frontend
-npm run dev
+npm install
+npm run dev   # demo mode unless VITE_UPLOAD_URL / VITE_WS_URL are set
 ```
 
 ---

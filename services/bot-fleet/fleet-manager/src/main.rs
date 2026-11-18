@@ -10,12 +10,19 @@ mod fleet {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ---- read worker addresses ----
     let worker_addresses = env::var("BOT_WORKER_ADDRESSES")
-        .unwrap_or_else(|_| "http://[::1]:50051".to_string());
+        // Workers bind 0.0.0.0 (IPv4), so default to 127.0.0.1 rather than [::1].
+        .unwrap_or_else(|_| "http://127.0.0.1:50051".to_string());
 
     let addresses: Vec<String> = worker_addresses
         .split(',')
         .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
         .collect();
+
+    // Total load for one run, split evenly across workers.
+    let total_traders: u32 = env_or("FLEET_TOTAL_TRADERS", 20);
+    let total_ops: f64 = env_or("FLEET_TOTAL_OPS", 1000.0);
+    let duration_secs: i32 = env_or("FLEET_DURATION_SECS", 30);
 
     let num_workers = addresses.len() as u32;
     if num_workers == 0 {
@@ -25,9 +32,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ---- create one gRPC client per worker ----
     let mut clients = Vec::new();
     for addr in &addresses {
-        let client = fleet::bot_worker_client::BotWorkerClient::connect(addr.clone())
-            .await
-            .map_err(|e| format!("failed to connect to {}: {}", addr, e))?;
+        // Workers may still be starting; retry for ~30s before giving up.
+        let mut attempt = 0;
+        let client = loop {
+            match fleet::bot_worker_client::BotWorkerClient::connect(addr.clone()).await {
+                Ok(c) => break c,
+                Err(e) if attempt < 30 => {
+                    attempt += 1;
+                    eprintln!("worker {} not ready ({}), retrying...", addr, e);
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                }
+                Err(e) => return Err(format!("failed to connect to {}: {}", addr, e).into()),
+            }
+        };
         clients.push((addr.clone(), client));
         println!("Connected to worker at {}", addr);
     }
@@ -57,8 +74,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let msg = match consumer.recv().await {
             Ok(m) => m,
             Err(e) => {
-                eprintln!("Kafka error: {}", e);
-                return Err(Box::new(e) as Box<dyn std::error::Error>);
+                // Transient broker errors (e.g. Kafka still starting) must not
+                // kill the fleet manager; librdkafka reconnects on its own.
+                eprintln!("Kafka error (retrying): {}", e);
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                continue;
             }
         };
 
@@ -75,16 +95,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
 
                 // Distribute load evenly across workers
-                let traders_per_worker = 10 / num_workers;
-                let ops_per_worker = 100.0 / num_workers as f64;
+                let traders_per_worker = (total_traders / num_workers).max(1);
+                let ops_per_worker = total_ops / num_workers as f64;
 
                 for (addr, client) in &clients {
                     let mut client = client.clone();   // clone for the async task
                     let request = tonic::Request::new(fleet::TestRequest {
                         endpoint: event.endpoint.clone(),
                         num_traders: traders_per_worker as i32,
-                        duration_secs: 30,
+                        duration_secs,
                         orders_per_second: ops_per_worker,
+                        test_id: event.submission_id.clone(),
                     });
 
                     let addr = addr.clone();
@@ -102,4 +123,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
+}
+fn env_or<T: std::str::FromStr>(key: &str, fallback: T) -> T {
+    env::var(key).ok().and_then(|v| v.parse().ok()).unwrap_or(fallback)
 }

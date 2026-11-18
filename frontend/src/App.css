@@ -787,3 +787,18 @@ tbody tr.row-mine td {
 .result-actions {
   margin-top: 0.75rem;
 }
+
+.pending-cell.failed {
+  color: var(--danger);
+}
+
+.pending-error {
+  margin-left: 0.6rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 420px;
+  vertical-align: bottom;
+}

@@ -12,7 +12,7 @@ pub struct Order {
     pub timestamp: u128,            // microseconds since epoch
 }
 
-pub fn generate_order(trader_id: u32, order_counter: u64) -> Order {
+pub fn generate_order(run_tag: &str, trader_id: u32, order_counter: u64) -> Order {
     let now_micros = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap()
@@ -23,7 +23,7 @@ pub fn generate_order(trader_id: u32, order_counter: u64) -> Order {
     let price = 100.0 + (order_counter % 100) as f64;
 
     Order {
-        order_id: format!("bot{}-{}", trader_id, order_counter),
+        order_id: format!("{}-bot{}-{}", run_tag, trader_id, order_counter),
         order_type,
         side,
         price,

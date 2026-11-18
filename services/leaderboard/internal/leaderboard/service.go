@@ -12,6 +12,12 @@ type MetricsStore interface {
 	LatestMetrics(ctx context.Context) ([]model.LatestMetrics, error)
 }
 
+// SubmissionStore is optional: when the store also implements it, entries are
+// enriched with name/language and in-progress submissions are reported.
+type SubmissionStore interface {
+	Submissions(ctx context.Context) (map[string]model.Submission, error)
+}
+
 type Service struct {
 	store  MetricsStore
 	scorer scoring.Scorer
@@ -30,18 +36,31 @@ func (s *Service) Current(ctx context.Context) (model.LeaderboardResponse, error
 		return model.LeaderboardResponse{}, err
 	}
 
+	subs := map[string]model.Submission{}
+	if ss, ok := s.store.(SubmissionStore); ok {
+		if subs, err = ss.Submissions(ctx); err != nil {
+			return model.LeaderboardResponse{}, err
+		}
+	}
+
 	entries := make([]model.LeaderboardEntry, 0, len(metrics))
+	hasResults := make(map[string]bool, len(metrics))
 	for _, metric := range metrics {
+		hasResults[metric.TestID] = true
+		sub := subs[metric.TestID]
 		entries = append(entries, model.LeaderboardEntry{
-			TestID:  metric.TestID,
-			Score:   s.scorer.Score(metric),
-			TPS:     metric.TPS,
-			Total:   metric.Total,
-			Success: metric.Success,
-			Failure: metric.Failure,
-			P50US:   metric.P50US,
-			P90US:   metric.P90US,
-			P99US:   metric.P99US,
+			TestID:      metric.TestID,
+			Name:        sub.Name,
+			Language:    sub.Language,
+			Score:       s.scorer.Score(metric),
+			TPS:         metric.TPS,
+			Total:       metric.Total,
+			Success:     metric.Success,
+			Failure:     metric.Failure,
+			P50US:       metric.P50US,
+			P90US:       metric.P90US,
+			P99US:       metric.P99US,
+			Correctness: metric.Correctness,
 		})
 	}
 
@@ -53,5 +72,15 @@ func (s *Service) Current(ctx context.Context) (model.LeaderboardResponse, error
 		entries[i].Rank = i + 1
 	}
 
-	return model.LeaderboardResponse{Entries: entries}, nil
+	pending := make([]model.Submission, 0)
+	for id, sub := range subs {
+		if !hasResults[id] {
+			pending = append(pending, sub)
+		}
+	}
+	sort.Slice(pending, func(i, j int) bool {
+		return pending[i].SubmittedAt > pending[j].SubmittedAt
+	})
+
+	return model.LeaderboardResponse{Entries: entries, Pending: pending}, nil
 }

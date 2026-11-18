@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"sort"
 	"sync"
@@ -49,9 +50,9 @@ type priceLevel struct {
 
 type OrderBook struct {
 	mu         sync.Mutex
-	buyLevels  []priceLevel            // sorted descending price (best buy highest price)
-	sellLevels []priceLevel            // sorted ascending price  (best sell lowest price)
-	orderMap   map[string]*bookEntry  // orderID -> entry (for cancels)
+	buyLevels  []priceLevel          // sorted descending price (best buy highest price)
+	sellLevels []priceLevel          // sorted ascending price  (best sell lowest price)
+	orderMap   map[string]*bookEntry // orderID -> entry (for cancels)
 }
 
 func NewOrderBook() *OrderBook {
@@ -124,7 +125,9 @@ func (ob *OrderBook) removeOrder(orderID string) *bookEntry {
 }
 
 // match runs after a new limit order is added; tries to cross the spread.
-func (ob *OrderBook) match(o Order, conn *websocket.Conn) []Fill {
+// match fills o against the opposite side and returns the fills plus the
+// quantity left unfilled (o is a copy, so the caller must use the return).
+func (ob *OrderBook) match(o Order, conn *websocket.Conn) ([]Fill, int) {
 	var fills []Fill
 
 	if o.Side == "buy" {
@@ -188,7 +191,7 @@ func (ob *OrderBook) match(o Order, conn *websocket.Conn) []Fill {
 			}
 		}
 	}
-	return fills
+	return fills, o.Quantity
 }
 
 // ---------- WebSocket handler ----------
@@ -225,8 +228,11 @@ func handleConnection(book *OrderBook, conn *websocket.Conn) {
 		switch order.Type {
 		case "limit":
 			book.mu.Lock()
-			fills := book.match(order, conn)
-			if order.Quantity > 0 {
+			fills, remaining := book.match(order, conn)
+			// Only the unfilled remainder may rest on the book; adding the
+			// original quantity let fully filled orders be filled again.
+			if remaining > 0 {
+				order.Quantity = remaining
 				book.addOrder(order, conn)
 			}
 			book.mu.Unlock()
@@ -237,8 +243,15 @@ func handleConnection(book *OrderBook, conn *websocket.Conn) {
 			}
 
 		case "market":
+			// A market order takes liquidity at any price: give it a price
+			// that crosses every level (its own price field is ignored).
+			if order.Side == "buy" {
+				order.Price = math.MaxFloat64
+			} else {
+				order.Price = 0
+			}
 			book.mu.Lock()
-			fills := book.match(order, conn)
+			fills, _ := book.match(order, conn)
 			book.mu.Unlock()
 
 			for _, f := range fills {

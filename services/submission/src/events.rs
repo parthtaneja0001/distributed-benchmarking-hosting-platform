@@ -45,7 +45,10 @@ pub fn detect_language(tarball_bytes: &[u8]) -> &'static str {
 /// Publish a `submission.created` event to Redpanda.
 pub async fn publish_submission_created(id: &str, object_key: &str, language: &str) {
     let producer: FutureProducer = ClientConfig::new()
-        .set("bootstrap.servers", "localhost:9092")
+        .set(
+            "bootstrap.servers",
+            std::env::var("KAFKA_BROKER").unwrap_or_else(|_| "localhost:9092".into()),
+        )
         .set("message.timeout.ms", "5000")
         .create()
         .expect("Failed to create Kafka producer");

@@ -7,4 +7,7 @@ pub struct TelemetryEvent {
     pub order_id: String,
     pub latency_us: u64,
     pub success: bool,
+    /// When the bot received the ack (epoch µs). Optional for older bots.
+    #[serde(default)]
+    pub ts_us: Option<u64>,
 }

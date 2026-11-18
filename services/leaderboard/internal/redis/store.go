@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	goredis "github.com/redis/go-redis/v9"
@@ -34,6 +35,9 @@ func (s *Store) LatestMetrics(ctx context.Context) ([]model.LatestMetrics, error
 
 		for _, key := range keys {
 			item, err := s.readMetric(ctx, key)
+			if errors.Is(err, goredis.Nil) {
+				continue
+			}
 			if err != nil {
 				return nil, err
 			}
@@ -61,4 +65,39 @@ func (s *Store) readMetric(ctx context.Context, key string) (model.LatestMetrics
 	}
 
 	return metric, nil
+}
+
+const submissionKeyPrefix = "submission:"
+
+// Submissions returns all submission metadata records, keyed by id.
+func (s *Store) Submissions(ctx context.Context) (map[string]model.Submission, error) {
+	out := make(map[string]model.Submission)
+	var cursor uint64
+	for {
+		keys, next, err := s.client.Scan(ctx, cursor, submissionKeyPrefix+"*", 100).Result()
+		if err != nil {
+			return nil, fmt.Errorf("scan Redis submission keys: %w", err)
+		}
+		if len(keys) > 0 {
+			values, err := s.client.MGet(ctx, keys...).Result()
+			if err != nil {
+				return nil, fmt.Errorf("read Redis submission keys: %w", err)
+			}
+			for _, v := range values {
+				str, ok := v.(string)
+				if !ok {
+					continue // key expired between SCAN and MGET
+				}
+				var sub model.Submission
+				if json.Unmarshal([]byte(str), &sub) == nil && sub.ID != "" {
+					out[sub.ID] = sub
+				}
+			}
+		}
+		cursor = next
+		if cursor == 0 {
+			break
+		}
+	}
+	return out, nil
 }

@@ -12,7 +12,9 @@ impl Storage {
     pub async fn new(bucket: &str) -> Self {
         // Load the base AWS config with endpoint and credentials
         let base_config = aws_config::defaults(aws_config::BehaviorVersion::latest())
-            .endpoint_url("http://localhost:9000")
+            .endpoint_url(
+                std::env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "http://localhost:9000".into()),
+            )
             .load()
             .await;
 
@@ -22,6 +24,15 @@ impl Storage {
             .build();
 
         let client = Client::from_conf(s3_config);
+
+        // Create the bucket on first run; "already owned" errors are fine.
+        if client.head_bucket().bucket(bucket).send().await.is_err() {
+            match client.create_bucket().bucket(bucket).send().await {
+                Ok(_) => println!("Created bucket {}", bucket),
+                Err(e) => eprintln!("create_bucket {}: {}", bucket, e),
+            }
+        }
+
         Self {
             client: Arc::new(client),
             bucket: bucket.to_string(),

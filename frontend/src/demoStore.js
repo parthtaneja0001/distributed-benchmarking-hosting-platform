@@ -48,3 +48,30 @@ export function onSubmissionsChange(cb) {
     window.removeEventListener('storage', onStorage)
   }
 }
+
+// Ids of submissions this browser uploaded to the real backend, so the live
+// leaderboard can tag them with "you".
+const MINE_KEY = 'quantbench.mySubmissionIds'
+let mine = null
+
+export function loadMySubmissionIds() {
+  if (!mine) {
+    try {
+      const v = JSON.parse(localStorage.getItem(MINE_KEY))
+      mine = new Set(Array.isArray(v) ? v : [])
+    } catch {
+      mine = new Set()
+    }
+  }
+  return mine
+}
+
+export function rememberMySubmission(id) {
+  const ids = loadMySubmissionIds()
+  ids.add(id)
+  try {
+    localStorage.setItem(MINE_KEY, JSON.stringify([...ids].slice(-50)))
+  } catch {
+    /* in-memory only */
+  }
+}

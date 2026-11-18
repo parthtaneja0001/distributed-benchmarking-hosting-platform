@@ -16,3 +16,6 @@ Thumbs.db
 *.env.local
 *.tar.gz
 test.txt
+# Local backend runtime
+**/bin/
+.run/

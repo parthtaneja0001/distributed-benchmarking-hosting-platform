@@ -20,6 +20,7 @@ pub struct TelemetryEvent {
     pub order_id: String,
     pub latency_us: u64,
     pub success: bool,
+    pub ts_us: u64, // when the ack was received (epoch µs)
 }
 
 /// One simulated trader: connects, sends orders, reads acks, produces telemetry.
@@ -32,6 +33,7 @@ pub async fn run_bot(
     tx: mpsc::UnboundedSender<TelemetryEvent>,
     order_tx: mpsc::UnboundedSender<OrderSent>,
     fill_tx: mpsc::UnboundedSender<FillActual>,
+    run_tag: String,
 ) {
     // Connect to the WebSocket endpoint
     let ws_stream = match connect_async(&endpoint).await {
@@ -68,6 +70,7 @@ pub async fn run_bot(
                             order_id: ack.order_id,
                             latency_us: latency,
                             success: true,
+                            ts_us: now as u64,
                         };
                         let _ = tx_clone.send(event);
                         continue;
@@ -103,7 +106,7 @@ pub async fn run_bot(
     });
 
     // Sender task: generate orders at the given rate
-    let interval = tokio::time::interval(Duration::from_secs_f64(1.0 / orders_per_sec));
+    let interval = tokio::time::interval(Duration::from_secs_f64(1.0 / orders_per_sec.max(0.1)));
     tokio::pin!(interval);
     let end_time = tokio::time::Instant::now() + duration;
 
@@ -111,7 +114,7 @@ pub async fn run_bot(
     while tokio::time::Instant::now() < end_time {
         interval.as_mut().tick().await;
 
-        let order = generate_order(trader_id, order_counter);
+        let order = generate_order(&run_tag, trader_id, order_counter);
 
         // Publish the sent order for correctness validation
         let _ = order_tx.send(OrderSent {
