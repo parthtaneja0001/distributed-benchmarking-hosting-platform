@@ -6,6 +6,10 @@ A fully automated platform for stress‑testing contestant‑submitted trading e
 
 Upload a matching engine → it is deployed inside an isolated sandbox → a distributed fleet of bots bombards it with realistic order flow → live latency, throughput, and correctness metrics appear on a real‑time leaderboard.
 
+**Live demo:** https://snappy-slate-glixq6b-parth-tanejas-projects.vercel.app
+
+> The frontend is hosted on Vercel; the backend runs on a self-hosted machine exposed through Cloudflare tunnels. When the backend is offline, the site shows clearly labelled demo data instead of live results.
+
 ---
 
 ## Table of Contents
