@@ -27,6 +27,11 @@ wait_for() { # wait_for <seconds> <description> <command...>
   die "timed out waiting for $what"
 }
 
+# ---------------------------------------------------------------- 0. Tools
+for tool in cargo go protoc cloudflared; do
+  command -v "$tool" >/dev/null || die "$tool not found. Install it first (protoc: brew install protobuf; cloudflared: brew install cloudflared)"
+done
+
 # ---------------------------------------------------------------- 1. Docker
 if ! docker info >/dev/null 2>&1; then
   log "Starting Docker Desktop..."
@@ -83,16 +88,17 @@ wait_for 60 "submission service" curl -sf http://127.0.0.1:3000/healthz
 wait_for 30 "leaderboard service" curl -sf http://127.0.0.1:8081/healthz
 
 # ---------------------------------------------------------------- 5. Tunnels
-command -v cloudflared >/dev/null || die "cloudflared not installed (brew install cloudflared)"
 
 tunnel_url() { grep -ao 'https://[a-z0-9-]*\.trycloudflare\.com' "$RUN/$1.log" 2>/dev/null | head -1; }
 
 tunnel() { # tunnel <name> <local-url>  -> prints public URL
   local name=$1 url=$2 u
-  # Reuse a running tunnel so the public URL (and Vercel's config) stays put.
+  # Reuse a running tunnel so the public URL (and Vercel's config) stays put,
+  # but only if it still answers: Cloudflare deletes quick tunnels after a
+  # long disconnect (e.g. laptop sleep) while cloudflared keeps retrying.
   if [ -f "$RUN/$name.pid" ] && kill -0 "$(cat "$RUN/$name.pid")" 2>/dev/null; then
     u=$(tunnel_url "$name")
-    if [ -n "$u" ]; then echo "$u"; return 0; fi
+    if [ -n "$u" ] && curl -sf -m 10 "$u/healthz" >/dev/null 2>&1; then echo "$u"; return 0; fi
     kill "$(cat "$RUN/$name.pid")" 2>/dev/null || true
     sleep 1
   fi
